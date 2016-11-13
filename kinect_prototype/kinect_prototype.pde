@@ -1,9 +1,17 @@
 import org.openkinect.freenect.*;
 import org.openkinect.processing.*;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import javax.imageio.ImageIO;
+import jcifs.util.Base64;
+import websockets.*;
+
 // The kinect stuff is happening in another class
 KinectTracker tracker;
 Kinect kinect;
+
+WebsocketServer ws;
 
 float r, g, b;
 
@@ -19,6 +27,9 @@ void setup() {
   size(800, 600, P3D);
   //smooth();
   strokeWeight(0);
+  
+  ws = new WebsocketServer(this, 8080, "/");
+  
   kinect = new Kinect(this);
   tracker = new KinectTracker();
   ang = kinect.getTilt();
@@ -50,6 +61,20 @@ void draw() {
   fill(0);
   text("threshold: " + t + "    " +  "framerate: " + int(frameRate) + "    " + 
     "UP increase threshold, DOWN decrease threshold", 10, 500);
+    
+  loadPixels();
+  BufferedImage buffimg = new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
+  buffimg.setRGB( 0, 0, width, height, pixels, 0, width );
+  
+  ByteArrayOutputStream baos = new ByteArrayOutputStream();
+  try {
+      ImageIO.write( buffimg, "jpg", baos );
+    } catch( IOException ioe ) {
+  }
+  
+  String b64image = Base64.encode( baos.toByteArray() );
+  
+  ws.sendMessage(b64image);
 }
 
 // Adjust the threshold with key presses
@@ -76,4 +101,19 @@ void keyPressed() {
       kinect.setTilt(ang);
     }
   }
+}
+
+byte[] int2byte(int[]src) {
+  int srcLength = src.length;
+  byte[]dst = new byte[srcLength << 2];
+    
+  for (int i=0; i<srcLength; i++) {
+    int x = src[i];
+    int j = i << 2;
+    dst[j++] = (byte) (( x >>> 0 ) & 0xff);           
+    dst[j++] = (byte) (( x >>> 8 ) & 0xff);
+    dst[j++] = (byte) (( x >>> 16 ) & 0xff);
+    dst[j++] = (byte) (( x >>> 24 ) & 0xff);
+  }
+  return dst;
 }
