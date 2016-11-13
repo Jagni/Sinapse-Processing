@@ -9,12 +9,25 @@ float r, g, b;
 
 float ang;
 
+// Angle for rotation
+float a = 0;
+
+// We'll use a lookup table so that we don't have to repeat the math over and over
+float[] depthLookUp = new float[2048];
+
 void setup() {
-  size(640, 520);
+  size(800, 600, P3D);
+  //smooth();
+  strokeWeight(0);
   kinect = new Kinect(this);
   tracker = new KinectTracker();
   ang = kinect.getTilt();
   setupAudio();
+  
+  // Lookup table for all possible depth values (0 - 2047)
+  for (int i = 0; i < depthLookUp.length; i++) {
+    depthLookUp[i] = tracker.rawDepthToMeters(i);
+  }
  
   // an FFT needs to know how 
   // long the audio buffers it will be analyzing are

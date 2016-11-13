@@ -58,8 +58,6 @@ void checkAudio()
 
   fft.forward(in.mix);
  
-  stroke(255, 0, 0, 128);
-
   float maxFrequencyBand = 0;
   for(int i = 0; i < fft.specSize(); i++)
   {
