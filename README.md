@@ -2,7 +2,7 @@
 
 ## Iniciando conexão WebRTC
 
-- Instale as dependências. Na pasta `webrtc_client`:
+- Instale as dependências. Execute o comando abaixo na pasta `webrtc_client`:
 ```
 npm install
 ```
