@@ -7,6 +7,18 @@ Kinect kinect;
 boolean kinectless = true;
 PImage photo;
 int threshold = 50;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import javax.imageio.ImageIO;
+import jcifs.util.Base64;
+import websockets.*;
+
+// The kinect stuff is happening in another class
+KinectTracker tracker;
+Kinect kinect;
+
+WebsocketServer ws;
+
 float r, g, b;
 
 //Kinect angle
@@ -33,6 +45,8 @@ void setup() {
     factor = 600;
     skip = 4;
   }
+  
+  ws = new WebsocketServer(this, 8080, "/");
   
   kinect = new Kinect(this);
   tracker = new KinectTracker();
@@ -71,6 +85,20 @@ void draw() {
   }
   checkAudio();
   tracker.display();
+    
+  loadPixels();
+  BufferedImage buffimg = new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
+  buffimg.setRGB( 0, 0, width, height, pixels, 0, width );
+  
+  ByteArrayOutputStream baos = new ByteArrayOutputStream();
+  try {
+      ImageIO.write( buffimg, "jpg", baos );
+    } catch( IOException ioe ) {
+  }
+  
+  String b64image = Base64.encode( baos.toByteArray() );
+  
+  ws.sendMessage(b64image);
 }
 
 float rawDepthToMeters(int depthValue) {
@@ -94,4 +122,19 @@ PVector depthToWorld(int x, int y, int depthValue) {
   result.y = (float)((y - cy_d) * depth * fy_d);
   result.z = (float)(depth);
   return result;
+}
+
+byte[] int2byte(int[]src) {
+  int srcLength = src.length;
+  byte[]dst = new byte[srcLength << 2];
+    
+  for (int i=0; i<srcLength; i++) {
+    int x = src[i];
+    int j = i << 2;
+    dst[j++] = (byte) (( x >>> 0 ) & 0xff);           
+    dst[j++] = (byte) (( x >>> 8 ) & 0xff);
+    dst[j++] = (byte) (( x >>> 16 ) & 0xff);
+    dst[j++] = (byte) (( x >>> 24 ) & 0xff);
+  }
+  return dst;
 }
