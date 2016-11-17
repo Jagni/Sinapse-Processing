@@ -1,9 +1,6 @@
 import org.openkinect.freenect.*;
 import org.openkinect.processing.*;
 
-KinectTracker tracker;
-Kinect kinect;
-
 boolean kinectless = true;
 PImage photo;
 int threshold = 50;
