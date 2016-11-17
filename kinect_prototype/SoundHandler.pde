@@ -10,27 +10,26 @@ float maxAmplitude = 0;
 
 void setupAudio(){
   minim = new Minim(this);
-
   in = minim.getLineIn();
 }
 
 void createColor(char cor){
    if (cor == 'r'){
-     r += 30*maxAmplitude;
-     g += 3*maxAmplitude;
-     b += 3*maxAmplitude;
+     r += 40*maxAmplitude;
+     g += 4*maxAmplitude;
+     b += 4*maxAmplitude;
    }
    
    if (cor == 'g'){
-     g += 30*maxAmplitude;
-     r += 3*maxAmplitude;
-     b += 3*maxAmplitude;
+     g += 40*maxAmplitude;
+     r += 4*maxAmplitude;
+     b += 4*maxAmplitude;
    }
    
    if (cor == 'b'){
-     b += 30*maxAmplitude;
-     r += 3*maxAmplitude;
-     g += 3*maxAmplitude;
+     b += 40*maxAmplitude;
+     r += 4*maxAmplitude;
+     g += 4*maxAmplitude;
    }
    
    r -= 0.66;

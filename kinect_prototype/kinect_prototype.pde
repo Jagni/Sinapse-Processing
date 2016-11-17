@@ -1,79 +1,97 @@
 import org.openkinect.freenect.*;
 import org.openkinect.processing.*;
 
-// The kinect stuff is happening in another class
 KinectTracker tracker;
 Kinect kinect;
 
+boolean kinectless = true;
+PImage photo;
+int threshold = 50;
 float r, g, b;
 
+//Kinect angle
 float ang;
 
 // Angle for rotation
 float a = 0;
 
-// We'll use a lookup table so that we don't have to repeat the math over and over
+//Pixel skipping
+int skip = 10;
+//Resizing ratio
+int factor = 1000;
+
+// Lookup table for all possible depth values (0 - 2047)
 float[] depthLookUp = new float[2048];
 
 void setup() {
   size(800, 600, P3D);
-  //smooth();
-  strokeWeight(0);
+  sphereDetail(10);
+  
+  if (kinectless){
+    photo = loadImage("kinectless.jpg");
+    photo.loadPixels();
+    factor = 600;
+    skip = 4;
+  }
+  
   kinect = new Kinect(this);
   tracker = new KinectTracker();
   ang = kinect.getTilt();
   setupAudio();
   
-  // Lookup table for all possible depth values (0 - 2047)
   for (int i = 0; i < depthLookUp.length; i++) {
-    depthLookUp[i] = tracker.rawDepthToMeters(i);
+    depthLookUp[i] = rawDepthToMeters(i);
   }
  
-  // an FFT needs to know how 
-  // long the audio buffers it will be analyzing are
-  // and also needs to know 
-  // the sample rate of the audio it is analyzing
   fft = new FFT(in.bufferSize(), in.sampleRate());
 }
 
 void draw() {
-  checkAudio();
-  background(255);
-
-  // Run the tracking analysis
-   tracker.track();
- // Show the image
-  tracker.display();
-
-  // Display some info
-  int t = tracker.getThreshold();
-  fill(0);
-  text("threshold: " + t + "    " +  "framerate: " + int(frameRate) + "    " + 
-    "UP increase threshold, DOWN decrease threshold", 10, 500);
-}
-
-// Adjust the threshold with key presses
-void keyPressed() {
-  int t = tracker.getThreshold();
-  println("get: %f", kinect.getTilt());
-  if (key == CODED) {
-    if (keyCode == UP) {
-      t+=5;
-      tracker.setThreshold(t);
-    } else if (keyCode == DOWN) {
-      t-=5;
-      tracker.setThreshold(t);
-    }
-    else if (keyCode == LEFT) {
-      ang--;
-      ang = constrain(ang, -10, 30);
-      println(ang);
-      kinect.setTilt(ang);
-    } else if (keyCode == RIGHT) {
-      ang++;
-      ang = constrain(ang, -10, 30);
-      println(ang);
-      kinect.setTilt(ang);
+  if (keyPressed) {
+    if (key == CODED) {
+      if (keyCode == UP) {
+        threshold +=5;
+      }
+      else if (keyCode == DOWN) {
+        threshold-=5;
+      }
+      else if (keyCode == LEFT) {
+        a-=0.1;
+        ang = constrain(ang, -10, 30);
+        println(ang);
+        kinect.setTilt(ang);
+      }
+      else if (keyCode == RIGHT) {
+        a += 0.1;
+        ang = constrain(ang, -10, 30);
+        println(ang);
+        kinect.setTilt(ang);
+      }
     }
   }
+  checkAudio();
+  tracker.display();
+}
+
+float rawDepthToMeters(int depthValue) {
+  if (depthValue < 2047) {
+    return (float)(1.0 / ((double)(depthValue) * -0.0030711016 + 3.3309495161));
+  }
+  return 0.0f;
+}
+
+// Only needed to make sense of the ouput depth values from the kinect
+PVector depthToWorld(int x, int y, int depthValue) {
+  final double fx_d = 1.0 / 5.9421434211923247e+02;
+  final double fy_d = 1.0 / 5.9104053696870778e+02;
+  final double cx_d = 3.3930780975300314e+02;
+  final double cy_d = 2.4273913761751615e+02;
+
+// Drawing the result vector to give each point its three-dimensional space
+  PVector result = new PVector();
+  double depth =  depthLookUp[depthValue];//rawDepthToMeters(depthValue);
+  result.x = (float)((x - cx_d) * depth * fx_d);
+  result.y = (float)((y - cy_d) * depth * fy_d);
+  result.z = (float)(depth);
+  return result;
 }
