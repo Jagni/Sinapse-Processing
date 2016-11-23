@@ -1,6 +1,7 @@
 import org.openkinect.freenect.*;
 import org.openkinect.processing.*;
 
+<<<<<<< HEAD
 import shapes3d.utils.*;
 import shapes3d.*;
 
@@ -8,6 +9,9 @@ KinectTracker tracker;
 Kinect kinect;
 
 boolean kinectless = false;
+=======
+boolean kinectless = true;
+>>>>>>> 773424c17f8ed539cc0206eebf01c48e81a3e686
 PImage photo;
 int threshold = 50;
 import java.awt.image.BufferedImage;
