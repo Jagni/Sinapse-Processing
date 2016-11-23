@@ -1,10 +1,13 @@
 import org.openkinect.freenect.*;
 import org.openkinect.processing.*;
 
+import shapes3d.utils.*;
+import shapes3d.*;
+
 KinectTracker tracker;
 Kinect kinect;
 
-boolean kinectless = true;
+boolean kinectless = false;
 PImage photo;
 int threshold = 50;
 import java.awt.image.BufferedImage;
@@ -12,10 +15,6 @@ import java.io.ByteArrayOutputStream;
 import javax.imageio.ImageIO;
 import jcifs.util.Base64;
 import websockets.*;
-
-// The kinect stuff is happening in another class
-KinectTracker tracker;
-Kinect kinect;
 
 WebsocketServer ws;
 
@@ -28,22 +27,27 @@ float ang;
 float a = 0;
 
 //Pixel skipping
-int skip = 10;
+int skip = 15;
 //Resizing ratio
-int factor = 1000;
+int factor = 750;
+float edgeDistance = skip*1.1;
 
 // Lookup table for all possible depth values (0 - 2047)
 float[] depthLookUp = new float[2048];
 
+PApplet applet;
+
 void setup() {
   size(800, 600, P3D);
-  sphereDetail(10);
+
+  
+  applet = this;
   
   if (kinectless){
     photo = loadImage("kinectless.jpg");
     photo.loadPixels();
     factor = 600;
-    skip = 4;
+    skip = 15;
   }
   
   ws = new WebsocketServer(this, 8080, "/");

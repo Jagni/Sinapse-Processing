@@ -35,7 +35,8 @@ class KinectTracker {
     
     //Determines the closest point
     float minimumDepth = threshold;  
-    
+    //skeleton.clear();
+    ArrayList<PVector> points = new ArrayList<PVector>();
     for (int x = 0; x < kinect.width; x += skip) {
       for (int y = 0; y < kinect.height; y += skip) {
         int offset = x + y * kinect.width;
@@ -61,15 +62,38 @@ class KinectTracker {
        
           if (kinectless){
             sphere(skip * map(rawDepth, minimumDepth, threshold, 0.25, 0.05));
+            points.add( new PVector(v.x*factor, v.y*factor, factor-v.z*factor ) );
           }
           else{
-            sphere(skip * map(rawDepth, minimumDepth, threshold, 1.5, 0.25));
+            //sphere(skip * map(rawDepth, minimumDepth, threshold, 0.15, 0.05));
+            box(skip * map(rawDepth, minimumDepth, threshold, 0.3, 0.15));
+            points.add( new PVector(v.x*factor, v.y*factor, factor-v.z*factor ) );
           }
         
           popMatrix();
         }
       }
     }
+    
+    for (int i = 0; i < points.size(); i++) {
+      int edgeCount = 0;
+      PVector point1 = points.get(i);
+      for (int j = i+1; j < points.size(); j++) {
+        PVector point2 = points.get(j);
+        //if (dist(point1.x, point1.y, point2.x, point2.y) <= edgeDistance && point1.z != point2.z) {
+        if (point1.dist(point2) <= edgeDistance) {
+          edgeCount++;
+          strokeWeight(5);
+          stroke(255);
+          line(point1.x, point1.y, point1.z, point2.x, point2.y, point2.z);
+        }
+        
+        if (edgeCount >= 3){
+          break;
+        }
+      }
+    }
+    //skeleton.plot(0.15, 0.1);
   }
 
   int getThreshold() {
