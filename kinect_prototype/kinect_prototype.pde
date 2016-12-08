@@ -1,21 +1,16 @@
 import org.openkinect.freenect.*;
 import org.openkinect.processing.*;
-
-<<<<<<< HEAD
-import shapes3d.utils.*;
-import shapes3d.*;
+import nervoussystem.obj.*;
 
 KinectTracker tracker;
 Kinect kinect;
 
 boolean kinectless = false;
-=======
-boolean kinectless = true;
->>>>>>> 773424c17f8ed539cc0206eebf01c48e81a3e686
 PImage photo;
-int threshold = 50;
+int threshold = 500;
+boolean record = false;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 import javax.imageio.ImageIO;
 import jcifs.util.Base64;
 import websockets.*;
@@ -26,32 +21,30 @@ float r, g, b;
 
 //Kinect angle
 float ang;
-
-// Angle for rotation
-float a = 0;
-
-//Pixel skipping
-int skip = 15;
-//Resizing ratio
-int factor = 750;
-float edgeDistance = skip*1.1;
+int skip = 6;
+int factor = 1100;
+ArrayList<PVector> points = new ArrayList<PVector>();
 
 // Lookup table for all possible depth values (0 - 2047)
 float[] depthLookUp = new float[2048];
 
+PGraphics kinectLayer;
+
 PApplet applet;
-
+float centerX, centerY; 
 void setup() {
-  size(800, 600, P3D);
+  fullScreen(P3D);
+  kinectLayer = createGraphics(800, 600, P3D);
 
-  
+  frameRate(60);
   applet = this;
+    
+  centerX = width/2.0;
+  centerY = height/2; 
   
   if (kinectless){
-    photo = loadImage("kinectless.jpg");
+    photo = loadImage("kinectless.png");
     photo.loadPixels();
-    factor = 600;
-    skip = 15;
   }
   
   ws = new WebsocketServer(this, 8080, "/");
@@ -59,44 +52,92 @@ void setup() {
   kinect = new Kinect(this);
   tracker = new KinectTracker();
   ang = kinect.getTilt();
-  setupAudio();
+  //setupAudio();
   
   for (int i = 0; i < depthLookUp.length; i++) {
     depthLookUp[i] = rawDepthToMeters(i);
   }
  
-  fft = new FFT(in.bufferSize(), in.sampleRate());
+  //fft = new FFT(in.bufferSize(), in.sampleRate());
+}
+
+void adjustCamera(){
+  PVector v = depthToWorld(0, 0, threshold);
+  
+  float xFactor = map(mouseX - (width/2), 0, width, -1, 1);
+  float yFactor = map(mouseY - (height/2), 0, height, -1, 1);
+  float zFactor = map(abs(mouseX - (width/2)), 0, 400, 0, 1);
+
+  kinectLayer.camera((2*(mouseX + xFactor*(width/4))), (2*(mouseY + yFactor*(height/4))), zFactor*((factor-v.z*factor)/2) + 1000, centerX, centerY, (factor-v.z*factor)/2, 0, 1, 0);
+}
+
+void mouseMoved(){
+  adjustCamera();
+}
+
+void keyPressed(){
+    if (key == 'w'){
+      centerY+= 10;
+    }
+    else if (key == 's'){
+      centerY-= 10;
+    }
+    if (key == 'a'){
+      centerX+= 100;
+    }
+    else if (key == 'd'){
+      centerX-= 100;
+    }
+    
+    else if (key == 'z'){
+      skip--;
+      skip = (int) constrain(skip, 1, 20);
+      points = new ArrayList<PVector>();
+    }
+    
+    else if (key == 'x'){
+      skip++;
+      skip = (int) constrain(skip, 1, 20);
+      points = new ArrayList<PVector>();
+    }
+    
+    
+    else if (key == 'c' || key == 'C'){
+      factor-=25;
+      points = new ArrayList<PVector>();
+    }
+    
+    else if(key == 'v' || key == 'V') {
+      factor+=25;
+      points = new ArrayList<PVector>();
+    }
+    
+    else if(key == 'q' || key == 'Q') {
+      record = true;
+    }
+    
+    if (key == CODED) {
+      if (keyCode == UP) {
+        threshold +=20;
+        threshold = (int) constrain(threshold, 0, 1000);
+        points = new ArrayList<PVector>();
+      }
+      else if (keyCode == DOWN) {
+        threshold-=20;
+        threshold = (int) constrain(threshold, 0, 1000);
+        points = new ArrayList<PVector>();
+      }
+    }
+    adjustCamera();
 }
 
 void draw() {
-  if (keyPressed) {
-    if (key == CODED) {
-      if (keyCode == UP) {
-        threshold +=5;
-      }
-      else if (keyCode == DOWN) {
-        threshold-=5;
-      }
-      else if (keyCode == LEFT) {
-        a-=0.1;
-        ang = constrain(ang, -10, 30);
-        println(ang);
-        kinect.setTilt(ang);
-      }
-      else if (keyCode == RIGHT) {
-        a += 0.1;
-        ang = constrain(ang, -10, 30);
-        println(ang);
-        kinect.setTilt(ang);
-      }
-    }
-  }
-  checkAudio();
+  //checkAudio();
   tracker.display();
-    
-  loadPixels();
-  BufferedImage buffimg = new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
-  buffimg.setRGB( 0, 0, width, height, pixels, 0, width );
+  text("fps: " + frameRate, 10, 50);
+  image(kinectLayer, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);
+  
+  BufferedImage buffimg = (BufferedImage) kinectLayer.get().getNative(); //new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
   
   ByteArrayOutputStream baos = new ByteArrayOutputStream();
   try {
@@ -107,6 +148,10 @@ void draw() {
   String b64image = Base64.encode( baos.toByteArray() );
   
   ws.sendMessage(b64image);
+  
+  kinectLayer.beginDraw();
+  kinectLayer.clear();
+  kinectLayer.endDraw();
 }
 
 float rawDepthToMeters(int depthValue) {
