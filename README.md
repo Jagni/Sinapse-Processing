@@ -22,3 +22,15 @@ _Os clientes tentarão se conectar via WebSocket em `ws://localhost:8080/p5webso
 - [x] Restringir número de clientes
 - [x] Proteção por senha/chave
 - [x] Recuperação se o servidor cair
+
+## Interface (Processing)
+
+Comando | Ação
+------------ | -------------
+Mover mouse | Rotacionar câmera
+WASD | Deslizar câmera
+Q | Salvar arquivo .obj
+Z | Aumentar nível de detalhes
+X | Diminuir nível de detalhes
+C | Aumentar zoom
+V | Diminuir zoom
