@@ -15,6 +15,7 @@ Kinect kinect;
 boolean kinectless = false;
 PImage photo;
 int threshold = 1000;
+boolean record = false;
 
 
 WebsocketServer ws;
