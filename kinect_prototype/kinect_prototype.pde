@@ -1,19 +1,21 @@
 import org.openkinect.freenect.*;
 import org.openkinect.processing.*;
 import nervoussystem.obj.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import javax.imageio.ImageIO;
+import jcifs.util.Base64;
+import websockets.*;
+import shapes3d.utils.*;
+import shapes3d.*;
 
 KinectTracker tracker;
 Kinect kinect;
 
 boolean kinectless = false;
 PImage photo;
-int threshold = 500;
-boolean record = false;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import javax.imageio.ImageIO;
-import jcifs.util.Base64;
-import websockets.*;
+int threshold = 1000;
+
 
 WebsocketServer ws;
 

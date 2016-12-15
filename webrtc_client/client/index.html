@@ -1,16 +1,122 @@
 <!DOCTYPE html>
 <html lang="pt-br">
   <head>
-    <title>Client | WebRTC</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Client | WebRTC</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: monospace;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        min-height: 100vh;
+        color: #fff;
+        background-color: #000;
+      }
+      h2 {
+        text-align: center;
+      }
+      #errorMessage {
+        color: #f55;
+      }
+      form,
+      .feedback {
+        max-width: 24rem;
+        width: 100%;
+      }
+      .connect {
+        display: flex;
+      }
+      .feedback {
+        display: none;
+      }
+      input, button {
+        outline: none;
+        padding: 1rem;
+        font-size: 1rem;
+        color: #fff;
+        background-color: transparent;
+        border: 1px solid currentColor;
+      }
+      input {
+        flex: 1;
+      }
+      button {
+        position: relative;
+        cursor: pointer;
+        margin-left: 0.5rem;
+      }
+      button:before {
+        top: -0.5rem;
+        left: -0.5rem;
+      }
+      button:after {
+        bottom: -0.5rem;
+        right: -0.5rem;
+      }
+      button:hover {
+        animation: rainbow 3s linear both infinite;
+      }
+      input:disabled,
+      button:disabled {
+        display: none;
+      }
+      @keyframes rainbow {
+        0%, 100% { color: #ffffff; } 10% { color: #accbe8; } 20% { color: #9295ca; } 30% { color: #9eceb4; } 40% { color: #a9b2b1; } 
+             50% { color: #cdb48c; } 60% { color: #ffd602; } 70% { color: #e66665; } 80% { color: #f47d43; } 90% { color: #ae70af; }
+      }
+      .client-id-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        padding: 1rem;
+      }
+    </style>
+    
+    <script src="libs/socket.io.js" defer></script>
+    <script src="libs/adapter.js" defer></script>
+    <script src="main.js" defer></script>
   </head>
   <body>
-    <p><button id="connect">Connect</button></p>
-    <canvas></canvas>
-    
-    <script src="libs/socket.io.js"></script>
-    <script src="libs/adapter.js"></script>
-    <script src="main.js"></script>
+    <div class="sinapse">
+      <span class="client-id-container">ID: <span class="client-id"></span></span>
+      <form method="POST">
+        <h2>Sinapse</h2>
+        <div class="connect">
+          <input type="password" name="password" id="password" autocomplete="off">
+          <button type="submit" id="connect"><strong>Conectar</strong></button>
+        </div>
+        <p id="errorMessage">&nbsp;</p>
+      </form>
+      <canvas width="0" height="0"></canvas>
+      <p class="feedback"></p>
+    </div>
+
+    <script id="shader-fs" type="x-shader/x-fragment">
+      precision mediump float;
+      
+      uniform sampler2D uImage;
+      varying vec2 vTexCoord;
+
+      void main() {
+        gl_FragColor = texture2D(uImage, vTexCoord);
+      }
+    </script>
+    <script id="shader-vs" type="x-shader/x-vertex">
+      attribute vec2 aVertexPosition;
+      attribute vec2 aTextureCoord;
+
+      varying vec2 vTexCoord;
+
+      void main() {
+        gl_Position = vec4(aVertexPosition, 0, 1);
+        vTexCoord = aTextureCoord;
+      }
+    </script>
   </body>
 </html>
