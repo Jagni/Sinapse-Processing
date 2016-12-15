@@ -24,7 +24,7 @@ float r, g, b;
 
 //Kinect angle
 float ang;
-int skip = 6;
+int skip = 20;
 int factor = 1100;
 ArrayList<PVector> points = new ArrayList<PVector>();
 
@@ -38,7 +38,7 @@ float centerX, centerY;
 void setup() {
   fullScreen(P3D);
   kinectLayer = createGraphics(800, 600, P3D);
-
+  setupAudio();
   frameRate(60);
   applet = this;
     
@@ -61,7 +61,7 @@ void setup() {
     depthLookUp[i] = rawDepthToMeters(i);
   }
  
-  //fft = new FFT(in.bufferSize(), in.sampleRate());
+  fft = new FFT(in.bufferSize(), in.sampleRate());
 }
 
 void adjustCamera(){
@@ -135,7 +135,7 @@ void keyPressed(){
 }
 
 void draw() {
-  //checkAudio();
+  checkAudio();
   tracker.display();
   text("fps: " + frameRate, 10, 50);
   image(kinectLayer, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);

@@ -15,26 +15,26 @@ void setupAudio(){
 
 void createColor(char cor){
    if (cor == 'r'){
-     r += 40*maxAmplitude;
-     g += 4*maxAmplitude;
-     b += 4*maxAmplitude;
+     r += 4;
+     g --;
+     b --;
    }
    
    if (cor == 'g'){
-     g += 40*maxAmplitude;
-     r += 4*maxAmplitude;
-     b += 4*maxAmplitude;
+     g += 4;
+     r --;
+     b --;
    }
    
    if (cor == 'b'){
-     b += 40*maxAmplitude;
-     r += 4*maxAmplitude;
-     g += 4*maxAmplitude;
+     b += 4;
+     r --;
+     g --;
    }
    
-   r -= 0.66;
-   g -= 0.66;
-   b -= 0.66;
+   r--;
+   g--;
+   b--;
    
    r = constrain(r, 100, 255.0);
    g = constrain(g, 100, 255.0);
@@ -43,15 +43,16 @@ void createColor(char cor){
 
 void checkAudio()
 {
-  if (maxFrequency <= 10){
+  
+  if (maxFrequency <= 5){
     createColor('b');
   }
   
-  if (maxFrequency > 10 && maxFrequency <= 20){
+  if (maxFrequency > 5 && maxFrequency <= 10){
     createColor('g');
   }
   
-  if (maxFrequency > 20){
+  if (maxFrequency > 15){
     createColor('r');
   }
 
@@ -61,10 +62,10 @@ void checkAudio()
   for(int i = 0; i < fft.specSize(); i++)
   {
     if (fft.getBand(i) > maxFrequencyBand){
-      maxFrequencyBand = fft.getBand(i);
       maxFrequency = i;
+      maxFrequencyBand = fft.getBand(i);
     }
   }
-  
+  println(fft.getBandWidth());
   maxAmplitude = in.left.level() + in.right.level();
 }
