@@ -60,7 +60,7 @@ function webSocketConnection() {
   return wsConn;
 }
 
-var socket = io('localhost:7000');
+var socket = io('https://sinapse.melros.co');
 
 socket.on('disconnection', () => {
   canvas.width = 0;

@@ -1,13 +1,6 @@
-import org.openkinect.freenect.*;
-import org.openkinect.processing.*;
-import nervoussystem.obj.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import javax.imageio.ImageIO;
-import jcifs.util.Base64;
-import websockets.*;
-import shapes3d.utils.*;
-import shapes3d.*;
 
 KinectTracker tracker;
 Kinect kinect;
@@ -138,7 +131,7 @@ void draw() {
   checkAudio();
   tracker.display();
   text("fps: " + frameRate, 10, 50);
-  image(kinectLayer, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);
+  //image(kinectLayer, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);
   
   BufferedImage buffimg = (BufferedImage) kinectLayer.get().getNative(); //new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
   
