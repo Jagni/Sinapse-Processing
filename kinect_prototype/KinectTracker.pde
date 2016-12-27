@@ -16,7 +16,6 @@ class KinectTracker {
     maximumDepth = 0;
     depth = kinect.getRawDepth();
     background(0);
-
     boolean shouldCreatePoints = true;
 
     if (kinectless && points.size() > 0) {
@@ -31,7 +30,6 @@ class KinectTracker {
 
 
     kinectLayer.beginDraw();
-    
     kinectLayer.translate(width/2, height/2, 0);
     kinectLayer.directionalLight(mainRed, mainGreen, mainBlue, -1, 0, 0);
     kinectLayer.directionalLight(secondaryRed, secondaryGreen, secondaryBlue, 1, 0, 0);
