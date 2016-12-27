@@ -37,7 +37,7 @@ class KinectTracker {
     if (points.size() > 0) {
       drawTriangles(kinectLayer);
     }
-    kinectLayer.filter(blur);
+    //kinectLayer.filter(blur);
     kinectLayer.endDraw();
 
     if (record) {
@@ -66,6 +66,7 @@ class KinectTracker {
         float zAverage = (t.p1.z + t.p2.z + t.p3.z)/3;
         PVector maxDepthVector = depthToWorld(0, 0, this.maximumDepth);
         PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
+        if (triangles){
         //pg.fill(map(zAverage, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 255, 50));
         pg.fill(255);
         pg.noStroke();
@@ -74,8 +75,9 @@ class KinectTracker {
         pg.vertex(t.p2.x, t.p2.y, t.p2.z);
         pg.vertex(t.p3.x, t.p3.y, t.p3.z);
         pg.endShape();
+        }
 
-        float weight = map(t.p2.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+        float weight = map(t.p2.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 5, 1);
 
         if (lines){
         line3D(t.p1.x, t.p1.y, t.p1.z, 
@@ -83,7 +85,7 @@ class KinectTracker {
           weight, 
           color(255, 255, 255), pg);
 
-        weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+        weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 5, 1);
 
 
         line3D(t.p1.x, t.p1.y, t.p1.z, 
@@ -91,7 +93,7 @@ class KinectTracker {
           weight, 
           color(255, 255, 255), pg);
           
-        weight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+        weight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 5, 1);
 
 
         line3D(t.p3.x, t.p3.y, t.p3.z, 
@@ -162,7 +164,7 @@ class KinectTracker {
           PVector maxDepthVector = depthToWorld(0, 0, this.maximumDepth);
           PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
           float weight;
-          weight = map(point1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 0.3);
+          weight = map(point1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 5, 1);
           line3D(point1.x, point1.y, point1.z, 
             point2.x, point2.y, point2.z, 
             5, 

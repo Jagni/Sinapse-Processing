@@ -40,30 +40,6 @@ void drawInterface(PGraphics pg){
   pg.arc(0, 0, width/40, width/40, 0, TWO_PI - map(second(), 0, 60, 0, TWO_PI), PIE);
   pg.popMatrix();
   
-  pg.pushMatrix();
-  pg.translate(width/2, height/2, 0);
-  pg.rotateX(PI/2);
-  pg.rotateZ(-PI/6);
-  pg.stroke(255);
-  pg.beginShape();
-  pg.vertex(-100, -100, -100);
-  pg.vertex( 100, -100, -100);
-  pg.vertex(   0, 0, 100);
-
-  pg.vertex( 100, -100, -100);
-  pg.vertex( 100, 100, -100);
-  pg.vertex(   0, 0, 100);
-
-  pg.vertex( 100, 100, -100);
-  pg.vertex(-100, 100, -100);
-  pg.vertex(   0, 0, 100);
-
-  pg.vertex(-100, 100, -100);
-  pg.vertex(-100, -100, -100);
-  pg.vertex(   0, 0, 100);
-  pg.endShape();
-  pg.popMatrix();
-  
   //pg.filter(blur);
 
   pg.endDraw();

@@ -5,13 +5,13 @@ import javax.imageio.ImageIO;
 KinectTracker tracker;
 Kinect kinect;
 
-boolean kinectless = true;
-boolean lines = true;
+boolean kinectless = false;
+boolean lines = false;
+boolean triangles = true;
 PImage photo;
 int threshold = 1000;
 boolean record = false;
 PShader blur;
-
 
 WebsocketServer ws;
 
@@ -19,7 +19,7 @@ float r, g, b;
 
 //Kinect angle
 float ang;
-int skip = 20;
+int skip = 30;
 int factor = 1100;
 ArrayList<PVector> points = new ArrayList<PVector>();
 
@@ -29,12 +29,15 @@ float[] depthLookUp = new float[2048];
 PGraphics kinectLayer;
 PGraphics interfaceLayer;
 
+PostFX fx;
+
 PApplet applet;
 float centerX, centerY; 
 void setup() {
-  size(600, 450, P3D);
+  size(400, 300, P3D);
   pixelDensity(displayDensity());
-  kinectLayer = createGraphics(width - width/10, height - height/5, P3D);
+  fx = new PostFX(width, height);
+  kinectLayer = createGraphics(width, height, P3D);
   interfaceLayer = createGraphics(width, height, P2D);
   blur = loadShader("blur.glsl"); 
   setupAudio();
@@ -126,12 +129,31 @@ void draw() {
 
   tracker.display();
   drawInterface(interfaceLayer);
-  image(kinectLayer, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);
-  image(interfaceLayer, 0, 0);
-
   
+  PGraphics result = fx.filter(kinectLayer)
+    .brightPass(0)
+    .blur(skip*10, skip, false)
+    .blur(skip*10, skip, true)
+    .close();
 
-  text("fps: " + frameRate, 10, 50);
+  blendMode(BLEND);
+  image(kinectLayer, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);
+  blendMode(SCREEN);
+  image(result, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);
+  
+  result = fx.filter(interfaceLayer)
+    .brightPass(0.1)
+    .blur(200, 5, false)
+    .blur(200, 5, true)
+    .close();
+
+  blendMode(BLEND);
+  image(interfaceLayer, 0,0);
+  blendMode(SCREEN);
+  image(result, 0,0);
+  
+  //image(interfaceLayer, 0, 0);
+  //text("fps: " + frameRate, 10, 50);
 
   BufferedImage buffimg = (BufferedImage) kinectLayer.get().getNative(); //new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
   ByteArrayOutputStream baos = new ByteArrayOutputStream();
