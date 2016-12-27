@@ -19,7 +19,7 @@ class KinectTracker {
 
     boolean shouldCreatePoints = true;
 
-    if (kinectless && points.size() != 0) {
+    if (kinectless && points.size() > 0) {
       shouldCreatePoints = false;
     } else {
       points = new ArrayList<PVector>();
@@ -31,13 +31,15 @@ class KinectTracker {
 
 
     kinectLayer.beginDraw();
+    
     kinectLayer.translate(width/2, height/2, 0);
-    kinectLayer.directionalLight(r, g, b, -1, 0, 0);
-    kinectLayer.directionalLight(g, b, r, 1, 0, 0);
-    drawBoxes(kinectLayer);
+    kinectLayer.directionalLight(mainRed, mainGreen, mainBlue, -1, 0, 0);
+    kinectLayer.directionalLight(secondaryRed, secondaryGreen, secondaryBlue, 1, 0, 0);
+    //drawBoxes(kinectLayer);
     if (points.size() > 0) {
       drawTriangles(kinectLayer);
     }
+    kinectLayer.filter(blur);
     kinectLayer.endDraw();
 
     if (record) {
@@ -59,19 +61,46 @@ class KinectTracker {
 
     for (Triangle t : myTriangles)
     {
-      float p = t.diameter()/2;
-      float area = sqrt(p*((p-t.p1.dist(t.p2))*(p-t.p2.dist(t.p3))*(p-t.p3.dist(t.p1))));
-      if (area < skip*factor/4){
+      //float p = t.diameter()/2;
+      //float area = sqrt(p*((p-t.p1.dist(t.p2))*(p-t.p2.dist(t.p3))*(p-t.p3.dist(t.p1))));
+      if (dist(t.p1.x, t.p1.y, t.p2.x, t.p2.y) < skip*5 && dist(t.p1.x, t.p1.y, t.p3.x, t.p3.y) < skip*5 &&  dist(t.p3.x, t.p3.y, t.p2.x, t.p2.y) < skip*5){
+      //if (t.p1.dist(t.p2) < skip*4 && t.p1.dist(t.p3) < skip*4 && t.p3.dist(t.p2) < skip*4) {
         float zAverage = (t.p1.z + t.p2.z + t.p3.z)/3;
         PVector maxDepthVector = depthToWorld(0, 0, this.maximumDepth);
         PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
-        pg.fill(map(zAverage, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 255, 50));
+        //pg.fill(map(zAverage, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 255, 50));
+        pg.fill(255);
         pg.noStroke();
         pg.beginShape(TRIANGLES);
         pg.vertex(t.p1.x, t.p1.y, t.p1.z);
         pg.vertex(t.p2.x, t.p2.y, t.p2.z);
         pg.vertex(t.p3.x, t.p3.y, t.p3.z);
         pg.endShape();
+
+        float weight = map(t.p2.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+
+        if (lines){
+        line3D(t.p1.x, t.p1.y, t.p1.z, 
+          t.p2.x, t.p2.y, t.p2.z, 
+          weight, 
+          color(255, 255, 255), pg);
+
+        weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+
+
+        line3D(t.p1.x, t.p1.y, t.p1.z, 
+          t.p3.x, t.p3.y, t.p3.z, 
+          weight, 
+          color(255, 255, 255), pg);
+          
+        weight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+
+
+        line3D(t.p3.x, t.p3.y, t.p3.z, 
+          t.p2.x, t.p2.y, t.p2.z, 
+          weight, 
+          color(255, 255, 255), pg);
+        }
       }
     }
   }
@@ -135,7 +164,7 @@ class KinectTracker {
           PVector maxDepthVector = depthToWorld(0, 0, this.maximumDepth);
           PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
           float weight;
-          //weight = map(point1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 0.3);
+          weight = map(point1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 0.3);
           line3D(point1.x, point1.y, point1.z, 
             point2.x, point2.y, point2.z, 
             5, 

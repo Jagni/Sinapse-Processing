@@ -5,10 +5,12 @@ import javax.imageio.ImageIO;
 KinectTracker tracker;
 Kinect kinect;
 
-boolean kinectless = false;
+boolean kinectless = true;
+boolean lines = true;
 PImage photo;
 int threshold = 1000;
 boolean record = false;
+PShader blur;
 
 
 WebsocketServer ws;
@@ -25,22 +27,27 @@ ArrayList<PVector> points = new ArrayList<PVector>();
 float[] depthLookUp = new float[2048];
 
 PGraphics kinectLayer;
+PGraphics interfaceLayer;
 
 PApplet applet;
 float centerX, centerY; 
 void setup() {
   fullScreen(P3D);
   kinectLayer = createGraphics(800, 600, P3D);
+  interfaceLayer = createGraphics(width, height, P2D);
+  blur = loadShader("blur.glsl"); 
   setupAudio();
   frameRate(60);
   applet = this;
     
-  centerX = width/2.0;
-  centerY = height/2; 
+  centerX = width/2.0 - 50;
+  centerY = 50 + height/2; 
   
   if (kinectless){
     photo = loadImage("kinectless.png");
     photo.loadPixels();
+    skip = 20;
+    threshold = 500;
   }
   
   ws = new WebsocketServer(this, 8080, "/");
@@ -59,11 +66,11 @@ void setup() {
 
 void adjustCamera(){
   PVector v = depthToWorld(0, 0, threshold);
-  
+  //kinectLayer.camera(50 + width*5/8, height*3/4, ((factor-v.z*factor)/2) + 1000, centerX, centerY, (factor-v.z*factor)/2, 0, 1, 0);
+
   float xFactor = map(mouseX - (width/2), 0, width, -1, 1);
   float yFactor = map(mouseY - (height/2), 0, height, -1, 1);
   float zFactor = map(abs(mouseX - (width/2)), 0, 400, 0, 1);
-
   kinectLayer.camera((2*(mouseX + xFactor*(width/4))), (2*(mouseY + yFactor*(height/4))), zFactor*((factor-v.z*factor)/2) + 1000, centerX, centerY, (factor-v.z*factor)/2, 0, 1, 0);
 }
 
@@ -93,7 +100,7 @@ void keyPressed(){
     
     else if (key == 'x'){
       skip++;
-      skip = (int) constrain(skip, 1, 20);
+      //skip = (int) constrain(skip, 1, 20);
       points = new ArrayList<PVector>();
     }
     
@@ -129,9 +136,12 @@ void keyPressed(){
 
 void draw() {
   checkAudio();
+  
   tracker.display();
+  drawInterface(interfaceLayer);
   text("fps: " + frameRate, 10, 50);
-  //image(kinectLayer, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);
+  image(interfaceLayer, 0, 0);
+  image(kinectLayer, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);
   
   BufferedImage buffimg = (BufferedImage) kinectLayer.get().getNative(); //new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
   
@@ -148,6 +158,10 @@ void draw() {
   kinectLayer.beginDraw();
   kinectLayer.clear();
   kinectLayer.endDraw();
+  
+  interfaceLayer.beginDraw();
+  interfaceLayer.clear();
+  interfaceLayer.endDraw();
 }
 
 float rawDepthToMeters(int depthValue) {
