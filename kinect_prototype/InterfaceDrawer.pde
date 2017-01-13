@@ -31,7 +31,7 @@ void drawInterface(PGraphics pg){
     pg.translate(width - width/80, height - height/80);
     pg.rotate(PI);
     pg.fill(secondaryRed, secondaryGreen, secondaryBlue);
-    pg.rect(i*width/120 + 1, 0, width/120, fft.calcAvg((i-1)*fft.getBandWidth()*width/120 ,i*fft.getBandWidth()*5));
+    pg.rect(i*width/120 + 1, 0, width/120, fft.calcAvg(soundRange*(i-1)*fft.getBandWidth() ,i*fft.getBandWidth()*soundRange));
     pg.popMatrix();
   }
   pg.pushMatrix();

@@ -6,7 +6,7 @@ KinectTracker tracker;
 Kinect kinect;
 
 boolean kinectless = false;
-boolean lines = false;
+boolean lines = true;
 boolean triangles = true;
 PImage photo;
 int threshold = 1000;
@@ -19,7 +19,7 @@ float r, g, b;
 
 //Kinect angle
 float ang;
-int skip = 30;
+int skip = 20;
 int factor = 1100;
 ArrayList<PVector> points = new ArrayList<PVector>();
 
@@ -34,8 +34,9 @@ PostFX fx;
 PApplet applet;
 float centerX, centerY; 
 void setup() {
-  size(400, 300, P3D);
-  pixelDensity(displayDensity());
+  fullScreen(P3D);
+  size(800, 600, P3D);
+  //pixelDensity(displayDensity());
   fx = new PostFX(width, height);
   kinectLayer = createGraphics(width, height, P3D);
   interfaceLayer = createGraphics(width, height, P2D);
@@ -50,7 +51,6 @@ void setup() {
   if (kinectless) {
     photo = loadImage("kinectless.png");
     photo.loadPixels();
-    skip = 20;
     threshold = 500;
   }
 
@@ -83,7 +83,14 @@ void mouseMoved() {
 }
 
 void keyPressed() {
-  if (key == 'w') {
+  if (key == 'l'){
+    lines = !lines;
+  }
+  else if (key == 't'){
+    triangles = !triangles;
+  }
+  
+  else if (key == 'w') {
     centerY+= 10;
   } else if (key == 's') {
     centerY-= 10;
@@ -94,11 +101,11 @@ void keyPressed() {
     centerX-= 100;
   } else if (key == 'z') {
     skip--;
-    skip = (int) constrain(skip, 1, 20);
+    skip = (int) constrain(skip, 10, 50);
     points = new ArrayList<PVector>();
   } else if (key == 'x') {
     skip++;
-    //skip = (int) constrain(skip, 1, 20);
+    skip = (int) constrain(skip, 10, 50);
     points = new ArrayList<PVector>();
   } else if (key == 'c' || key == 'C') {
     factor-=25;
@@ -132,8 +139,8 @@ void draw() {
   
   PGraphics result = fx.filter(kinectLayer)
     .brightPass(0)
-    .blur(skip*10, skip, false)
-    .blur(skip*10, skip, true)
+    .blur(int(maxAmplitude*width/5), skip*3, false)
+    .blur(int(maxAmplitude*height/5), skip*3, true)
     .close();
 
   blendMode(BLEND);
@@ -143,8 +150,8 @@ void draw() {
   
   result = fx.filter(interfaceLayer)
     .brightPass(0.1)
-    .blur(200, 5, false)
-    .blur(200, 5, true)
+    .blur(int(maxAmplitude*width/4), 5, false)
+    .blur(int(maxAmplitude*width/4), 5, true)
     .close();
 
   blendMode(BLEND);
@@ -153,19 +160,19 @@ void draw() {
   image(result, 0,0);
   
   //image(interfaceLayer, 0, 0);
-  //text("fps: " + frameRate, 10, 50);
+  text("fps: " + frameRate, 10, 50);
 
-  BufferedImage buffimg = (BufferedImage) kinectLayer.get().getNative(); //new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
-  ByteArrayOutputStream baos = new ByteArrayOutputStream();
-  try {
-    ImageIO.write( buffimg, "jpg", baos );
-  } 
-  catch( IOException ioe ) {
-  }
+  //BufferedImage buffimg = (BufferedImage) kinectLayer.get().getNative(); //new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
+  //ByteArrayOutputStream baos = new ByteArrayOutputStream();
+  //try {
+  //  ImageIO.write( buffimg, "jpg", baos );
+  //} 
+  //catch( IOException ioe ) {
+  //}
 
-  String b64image = Base64.encode( baos.toByteArray() );
+  //String b64image = Base64.encode( baos.toByteArray() );
 
-  ws.sendMessage(b64image);
+  //ws.sendMessage(b64image);
 
   kinectLayer.beginDraw();
   kinectLayer.clear();

@@ -4,6 +4,8 @@ FFT fft;
 
 float maxFrequency;
 float maxAmplitude = 0;
+int soundRange = 7;
+int bandSkip = 0;
 
 int mainRed, mainGreen, mainBlue;
 int secondaryRed, secondaryGreen, secondaryBlue;
@@ -21,38 +23,38 @@ void setupAudio() {
 
 void transitionToColors(color mainColor, color secondaryColor) {
   if (mainRed < red(mainColor)) {
-    mainRed++;
+    mainRed+=6;
   } else {
     mainRed--;
   }
-  
+
   if (mainGreen < green(mainColor)) {
-    mainGreen++;
+    mainGreen+=6;
   } else {
     mainGreen--;
   }
-  
+
   if (mainBlue < blue(mainColor)) {
-    mainBlue++;
+    mainBlue+=6;
   } else {
     mainBlue--;
   }
-  
-  
+
+
   if (secondaryRed < red(secondaryColor)) {
-    secondaryRed++;
+    secondaryRed+=6;
   } else {
     secondaryRed--;
   }
-  
+
   if (secondaryGreen < green(secondaryColor)) {
-    secondaryGreen++;
+    secondaryGreen+=6;
   } else {
     secondaryGreen--;
   }
-  
+
   if (secondaryBlue < blue(secondaryColor)) {
-    secondaryBlue++;
+    secondaryBlue+=6;
   } else {
     secondaryBlue--;
   }
@@ -62,49 +64,67 @@ void createColor(char cor) {
 
   if (cor == 'r') {    
     transitionToColors(laranjaAve, roxoMaria);
-    //r += 4;
-    //g --;
-    //b --;
-  }
-
-  if (cor == 'g') {
-    transitionToColors(azulAnjo, rosaPerua);
-    //g += 4;
-    //r --;
-    //b --;
   }
 
   if (cor == 'b') {
-    transitionToColors(verdeSofrido, marromDesmata);
-    //b += 4;
-    //r --;
-    //g --;
+    transitionToColors(azulAnjo, rosaPerua);
   }
 
-  //r--;
-  //g--;
-  //b--;
+  if (cor == 'g') {
+    transitionToColors(verdeSofrido, marromDesmata);
+  }
 
-  //r = constrain(r, 100, 255.0);
-  //g = constrain(g, 100, 255.0);
-  //b = constrain(b, 100, 255.0);
+  mainRed -=1;
+  mainRed = (int) constrain(mainRed, 30, 255);
+  
+  mainGreen -=1;
+  mainGreen = (int) constrain(mainGreen, 30, 255);
+  
+  mainBlue -=1;
+  mainBlue = (int) constrain(mainBlue, 30, 255);
+  
+  secondaryRed -=1;
+  secondaryRed = (int) constrain(secondaryRed, 30, 255);
+  
+  secondaryGreen -=1;
+  secondaryGreen = (int) constrain(secondaryGreen, 30, 255);
+  
+  secondaryBlue -=1;
+  secondaryBlue = (int) constrain(secondaryBlue, 30, 255);
 }
 
 void checkAudio()
 {
-
-  if (maxFrequency <= 7) {
-    createColor('b');
+  float blueAverage = fft.calcAvg(0, soundRange*fft.getBandWidth());
+  float greenAverage = 3*fft.calcAvg((soundRange + bandSkip)*fft.getBandWidth(), 3*soundRange*2*fft.getBandWidth());
+  float redAverage = 4*fft.calcAvg((soundRange*2 + bandSkip)*fft.getBandWidth(), 4*soundRange*3*fft.getBandWidth());
+  
+  if (maxAmplitude > 0.01){
+    if (blueAverage > greenAverage && blueAverage > redAverage){
+      createColor('b');
+    }
+    else if (greenAverage > redAverage){
+      createColor('g');
+    }
+    else{
+      createColor('r');
+    }
   }
-
-  if (maxFrequency > 7 && maxFrequency <= 12) {
-    createColor('g');
+  else{
+    createColor('n');
   }
-
-  if (maxFrequency > 17) {
-    createColor('r');
-  }
-
+  //if (maxAmplitude > 0.01) {
+  //  if (maxFrequency <= 15) {
+  //    createColor('b');
+  //  } else if (maxFrequency > 15 && maxFrequency <= 20) {
+  //    createColor('g');
+  //  } else if (maxFrequency > 20) {
+  //    createColor('r');
+  //  }
+  //} else {
+  //  createColor('n');
+  //}
+ 
   fft.forward(in.mix);
 
   float maxFrequencyBand = 0;
@@ -115,5 +135,6 @@ void checkAudio()
       maxFrequencyBand = fft.getBand(i);
     }
   }
+  
   maxAmplitude = in.left.level() + in.right.level();
 }

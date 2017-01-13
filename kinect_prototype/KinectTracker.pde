@@ -77,7 +77,7 @@ class KinectTracker {
         pg.endShape();
         }
 
-        float weight = map(t.p2.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 5, 1);
+        float weight = map(t.p2.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
         if (lines){
         line3D(t.p1.x, t.p1.y, t.p1.z, 
@@ -85,7 +85,7 @@ class KinectTracker {
           weight, 
           color(255, 255, 255), pg);
 
-        weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 5, 1);
+        weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
 
         line3D(t.p1.x, t.p1.y, t.p1.z, 
@@ -93,7 +93,7 @@ class KinectTracker {
           weight, 
           color(255, 255, 255), pg);
           
-        weight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 5, 1);
+        weight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
 
         line3D(t.p3.x, t.p3.y, t.p3.z, 
