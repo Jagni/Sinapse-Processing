@@ -55,8 +55,7 @@ class KinectTracker {
 
     myTriangles.clear();
     new Triangulator().triangulate(points, myTriangles);
-
-
+    
     for (Triangle t : myTriangles)
     {
       //float p = t.diameter()/2;
@@ -68,7 +67,7 @@ class KinectTracker {
         PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
         if (triangles){
         //pg.fill(map(zAverage, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 255, 50));
-        pg.fill(255);
+        pg.fill(50 + maxAmplitude*205);
         pg.noStroke();
         pg.beginShape(TRIANGLES);
         pg.vertex(t.p1.x, t.p1.y, t.p1.z);
@@ -83,7 +82,7 @@ class KinectTracker {
         line3D(t.p1.x, t.p1.y, t.p1.z, 
           t.p2.x, t.p2.y, t.p2.z, 
           weight, 
-          color(255, 255, 255), pg);
+          color(50 + maxAmplitude*205), pg);
 
         weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
@@ -91,7 +90,7 @@ class KinectTracker {
         line3D(t.p1.x, t.p1.y, t.p1.z, 
           t.p3.x, t.p3.y, t.p3.z, 
           weight, 
-          color(255, 255, 255), pg);
+          color(200 + maxAmplitude*55), pg);
           
         weight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
@@ -99,7 +98,7 @@ class KinectTracker {
         line3D(t.p3.x, t.p3.y, t.p3.z, 
           t.p2.x, t.p2.y, t.p2.z, 
           weight, 
-          color(255, 255, 255), pg);
+          color(255), pg);
         }
       }
     }

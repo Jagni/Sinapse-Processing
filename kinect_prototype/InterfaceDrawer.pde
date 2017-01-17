@@ -3,11 +3,11 @@ float squareSize;
 void drawInterface(PGraphics pg){
   pg.beginDraw();
   pg.background(0, 0);
-  squareSize = height/40;
+  squareSize = height/30;
   pg.fill(0, 0);
-  pg.stroke(secondaryRed, secondaryGreen, secondaryBlue);
+  pg.stroke(183, 244, 245);
   pg.pushMatrix();
-  pg.strokeWeight(2);
+  pg.strokeWeight(3);
   pg.translate(width/2, height/40);
   pg.line(-0.74*squareSize, squareSize*0.74, -1, 0.74*squareSize, squareSize*0.74, -1);
   pg.popMatrix();
@@ -26,18 +26,24 @@ void drawInterface(PGraphics pg){
   
   fft.forward(in.mix);
   
-  for(int i = 1; i <= 3; i++)  {
+  //Microfone
+  for(int i = 0; i <= 4; i++)  {
     pg.pushMatrix();
-    pg.translate(width - width/80, height - height/80);
+    float squareHeight = 1.5*fft.calcAvg(i*soundRange, (i+1)*fft.getBandWidth()*soundRange/2);
+    //float squareHeight = fft.calcAvg(soundRange*(i-1)*fft.getBandWidth() ,*fft.getBandWidth());
+    pg.translate(width - width/50, (height - height/50));
     pg.rotate(PI);
-    pg.fill(secondaryRed, secondaryGreen, secondaryBlue);
-    pg.rect(i*width/120 + 1, 0, width/120, fft.calcAvg(soundRange*(i-1)*fft.getBandWidth() ,i*fft.getBandWidth()*soundRange));
+    pg.fill(183, 244, 245);
+    pg.rect((i*width/300) + i*5, -squareHeight/2, width/350, squareHeight);
     pg.popMatrix();
   }
+  
+  //Tempo
   pg.pushMatrix();
-  pg.translate(width/40, height - height/40);
+  pg.noFill();
+  pg.translate(width/25, height - height/25);
   pg.rotate(-HALF_PI);
-  pg.arc(0, 0, width/40, width/40, 0, TWO_PI - map(second(), 0, 60, 0, TWO_PI), PIE);
+  pg.arc(0, 0, width/40, width/40, 0, TWO_PI - map(millis(), 0, 60000, 0, TWO_PI), OPEN);
   pg.popMatrix();
   
   //pg.filter(blur);

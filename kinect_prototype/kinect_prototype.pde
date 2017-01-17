@@ -35,8 +35,7 @@ PApplet applet;
 float centerX, centerY; 
 void setup() {
   fullScreen(P3D);
-  size(800, 600, P3D);
-  //pixelDensity(displayDensity());
+  //size(400, 150);
   fx = new PostFX(width, height);
   kinectLayer = createGraphics(width, height, P3D);
   interfaceLayer = createGraphics(width, height, P2D);
@@ -54,8 +53,8 @@ void setup() {
     threshold = 500;
   }
 
-  ws = new WebsocketServer(this, 8080, "/");
-
+  //ws = new WebsocketServer(this, 8080, "/");
+  //WebsocketClient wc = new WebsocketClient(this, "ws://localhost:8080/");
   kinect = new Kinect(this);
   tracker = new KinectTracker();
   ang = kinect.getTilt();
@@ -83,14 +82,11 @@ void mouseMoved() {
 }
 
 void keyPressed() {
-  if (key == 'l'){
+  if (key == 'l') {
     lines = !lines;
-  }
-  else if (key == 't'){
+  } else if (key == 't') {
     triangles = !triangles;
-  }
-  
-  else if (key == 'w') {
+  } else if (key == 'w') {
     centerY+= 10;
   } else if (key == 's') {
     centerY-= 10;
@@ -136,29 +132,29 @@ void draw() {
 
   tracker.display();
   drawInterface(interfaceLayer);
-  
+
   PGraphics result = fx.filter(kinectLayer)
     .brightPass(0)
-    .blur(int(maxAmplitude*width/5), skip*3, false)
-    .blur(int(maxAmplitude*height/5), skip*3, true)
+    .blur(int(skip*4 + int(maxAmplitude*skip*10)), skip*4, false)
+    .blur(int(skip*4 + int(maxAmplitude*skip*10)), skip*4, true)
     .close();
 
   blendMode(BLEND);
   image(kinectLayer, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);
   blendMode(SCREEN);
   image(result, (width/2) - kinectLayer.width/2, (height/2) - kinectLayer.height/2);
-  
+
   result = fx.filter(interfaceLayer)
     .brightPass(0.1)
-    .blur(int(maxAmplitude*width/4), 5, false)
-    .blur(int(maxAmplitude*width/4), 5, true)
+    .blur(5, 5, false)
+    .blur(5, 5, true)
     .close();
 
   blendMode(BLEND);
-  image(interfaceLayer, 0,0);
+  image(interfaceLayer, 0, 0);
   blendMode(SCREEN);
-  image(result, 0,0);
-  
+  image(result, 0, 0);
+
   //image(interfaceLayer, 0, 0);
   text("fps: " + frameRate, 10, 50);
 
@@ -172,6 +168,13 @@ void draw() {
 
   //String b64image = Base64.encode( baos.toByteArray() );
 
+  //ByteArrayOutputStream bao = new ByteArrayOutputStream();
+  //ObjectOutputStream oos = new ObjectOutputStream(bao);
+  //oos.writeObject(points);
+  //oos.close();
+
+  //ws.sendMessage(points.toString());
+  // transfer
   //ws.sendMessage(b64image);
 
   kinectLayer.beginDraw();

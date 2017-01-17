@@ -4,7 +4,7 @@ FFT fft;
 
 float maxFrequency;
 float maxAmplitude = 0;
-int soundRange = 7;
+int soundRange = 10;
 int bandSkip = 0;
 
 int mainRed, mainGreen, mainBlue;
