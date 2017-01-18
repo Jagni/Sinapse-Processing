@@ -1,6 +1,7 @@
 import java.awt.image.BufferedImage;
 import java.io.*;
 import javax.imageio.ImageIO;
+import java.util.Arrays;
 
 KinectTracker tracker;
 Kinect kinect;
@@ -14,6 +15,7 @@ boolean record = false;
 PShader blur;
 
 WebsocketServer ws;
+WebsocketClient wc;
 
 float r, g, b;
 
@@ -21,7 +23,10 @@ float r, g, b;
 float ang;
 int skip = 20;
 int factor = 1100;
-ArrayList<PVector> points = new ArrayList<PVector>();
+
+ArrayList<PVector> sentPoints = new ArrayList<PVector>();
+ArrayList<PVector> receivedPoints = new ArrayList<PVector>();
+ArrayList<PVector> drawnPoints = new ArrayList<PVector>();
 
 // Lookup table for all possible depth values (0 - 2047)
 float[] depthLookUp = new float[2048];
@@ -34,8 +39,8 @@ PostFX fx;
 PApplet applet;
 float centerX, centerY; 
 void setup() {
-  fullScreen(P3D);
-  //size(400, 150);
+  //fullScreen(P3D);
+  size(800, 600, P3D);
   fx = new PostFX(width, height);
   kinectLayer = createGraphics(width, height, P3D);
   interfaceLayer = createGraphics(width, height, P2D);
@@ -53,8 +58,8 @@ void setup() {
     threshold = 500;
   }
 
-  //ws = new WebsocketServer(this, 8080, "/");
-  //WebsocketClient wc = new WebsocketClient(this, "ws://localhost:8080/");
+  ws = new WebsocketServer(this, 8080, "/");
+  wc = new WebsocketClient(this, "ws://localhost:8080/");
   kinect = new Kinect(this);
   tracker = new KinectTracker();
   ang = kinect.getTilt();
@@ -69,7 +74,6 @@ void setup() {
 
 void adjustCamera() {
   PVector v = depthToWorld(0, 0, threshold);
-  //kinectLayer.camera(50 + width*5/8, height*3/4, ((factor-v.z*factor)/2) + 1000, centerX, centerY, (factor-v.z*factor)/2, 0, 1, 0);
 
   float xFactor = map(mouseX - (width/2), 0, width, -1, 1);
   float yFactor = map(mouseY - (height/2), 0, height, -1, 1);
@@ -98,17 +102,17 @@ void keyPressed() {
   } else if (key == 'z') {
     skip--;
     skip = (int) constrain(skip, 10, 50);
-    points = new ArrayList<PVector>();
+    sentPoints = new ArrayList<PVector>();
   } else if (key == 'x') {
     skip++;
     skip = (int) constrain(skip, 10, 50);
-    points = new ArrayList<PVector>();
+    sentPoints = new ArrayList<PVector>();
   } else if (key == 'c' || key == 'C') {
     factor-=25;
-    points = new ArrayList<PVector>();
+    sentPoints = new ArrayList<PVector>();
   } else if (key == 'v' || key == 'V') {
     factor+=25;
-    points = new ArrayList<PVector>();
+    sentPoints = new ArrayList<PVector>();
   } else if (key == 'q' || key == 'Q') {
     record = true;
   }
@@ -117,15 +121,32 @@ void keyPressed() {
     if (keyCode == UP) {
       threshold +=20;
       threshold = (int) constrain(threshold, 0, 1000);
-      points = new ArrayList<PVector>();
+      sentPoints = new ArrayList<PVector>();
     } else if (keyCode == DOWN) {
       threshold-=20;
       threshold = (int) constrain(threshold, 0, 1000);
-      points = new ArrayList<PVector>();
+      sentPoints = new ArrayList<PVector>();
     }
   }
   adjustCamera();
 }
+
+void webSocketEvent(String msg){
+  msg = msg.substring(0, msg.length()-1);
+  msg = msg.substring(0, msg.length()-1);
+  msg = msg.substring(1, msg.length());
+  ArrayList<String> pointStringList = new ArrayList<String>(Arrays.asList(msg.split("], ")));
+  
+  for (String string : pointStringList){
+    string = string.substring(1, string.length());
+    ArrayList<String> pointStrings = new ArrayList<String>(Arrays.asList(string.split(",")));
+    float x = Float.parseFloat(pointStrings.get(0));
+    float y = Float.parseFloat(pointStrings.get(1));
+    float z = Float.parseFloat(pointStrings.get(2));
+    receivedPoints.add(new PVector(x, y, z));
+  }
+}
+
 
 void draw() {
   checkAudio();
@@ -173,7 +194,7 @@ void draw() {
   //oos.writeObject(points);
   //oos.close();
 
-  //ws.sendMessage(points.toString());
+  ws.sendMessage(sentPoints.toString());
   // transfer
   //ws.sendMessage(b64image);
 

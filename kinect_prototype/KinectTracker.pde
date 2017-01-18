@@ -18,23 +18,29 @@ class KinectTracker {
     background(0);
     boolean shouldCreatePoints = true;
 
-    if (kinectless && points.size() > 0) {
+    if (kinectless && sentPoints.size() > 0) {
       shouldCreatePoints = false;
     } else {
-      points = new ArrayList<PVector>();
+      sentPoints = new ArrayList<PVector>();
     }
 
     if (shouldCreatePoints) {
       createPoints();
     }
 
+    if (receivedPoints.size() > 0){
+      drawnPoints = receivedPoints;
+    }
+    else{
+      drawnPoints = sentPoints;
+    }
 
     kinectLayer.beginDraw();
     kinectLayer.translate(width/2, height/2, 0);
     kinectLayer.directionalLight(mainRed, mainGreen, mainBlue, -1, 0, 0);
     kinectLayer.directionalLight(secondaryRed, secondaryGreen, secondaryBlue, 1, 0, 0);
     //drawBoxes(kinectLayer);
-    if (points.size() > 0) {
+    if (drawnPoints.size() > 0) {
       drawTriangles(kinectLayer);
     }
     //kinectLayer.filter(blur);
@@ -54,7 +60,7 @@ class KinectTracker {
   void drawTriangles(PGraphics pg) {
 
     myTriangles.clear();
-    new Triangulator().triangulate(points, myTriangles);
+    new Triangulator().triangulate(drawnPoints, myTriangles);
     
     for (Triangle t : myTriangles)
     {
@@ -140,7 +146,7 @@ class KinectTracker {
 
           PVector v = depthToWorld(x, y, rawDepth);
 
-          points.add( new PVector(v.x*factor, v.y*factor, factor-v.z*factor ) );
+          sentPoints.add( new PVector(v.x*factor, v.y*factor, factor-v.z*factor ) );
         }
       }
     }
@@ -151,13 +157,13 @@ class KinectTracker {
     PVector point2;
     int edgeCount = 0;
 
-    for (int i = 0; i < points.size(); i++) {
+    for (int i = 0; i < drawnPoints.size(); i++) {
       int loopCount = 0;
       edgeCount = 0;
-      point1 = points.get(i);
-      for (int j = i+1; j < points.size(); j++) {
+      point1 = drawnPoints.get(i);
+      for (int j = i+1; j < drawnPoints.size(); j++) {
         loopCount++;
-        point2 = points.get(j);
+        point2 = drawnPoints.get(j);
         if ( point1.dist(point2) <= skip*2) {
           edgeCount++;
           PVector maxDepthVector = depthToWorld(0, 0, this.maximumDepth);
