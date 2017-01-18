@@ -38,8 +38,8 @@ PostFX fx;
 PApplet applet;
 float centerX, centerY; 
 void setup() {
-  //fullScreen(P3D);
-  size(800, 600, P3D);
+  fullScreen(P3D);
+  //size(800, 600, P3D);
   fx = new PostFX(width, height);
   kinectLayer = createGraphics(width, height, P3D);
   interfaceLayer = createGraphics(width, height, P2D);
@@ -130,7 +130,6 @@ void keyPressed() {
 }
 
 void webSocketServerEvent(String msg){
-  println(1);
   msg = msg.substring(0, msg.length()-1);
   msg = msg.substring(0, msg.length()-1);
   msg = msg.substring(1, msg.length());

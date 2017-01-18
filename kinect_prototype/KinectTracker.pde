@@ -17,12 +17,14 @@ class KinectTracker {
     depth = kinect.getRawDepth();
     background(0);
     boolean shouldCreatePoints = true;
+    
+    drawnPoints = new ArrayList<PVector>();
 
-    if (kinectless && sentPoints.size() > 0) {
-      shouldCreatePoints = false;
-    } else {
+    //if (kinectless && sentPoints.size() > 0) {
+    //  shouldCreatePoints = true;
+    //} else {
       sentPoints = new ArrayList<PVector>();
-    }
+    //}
 
     if (shouldCreatePoints) {
       createPoints();
@@ -30,6 +32,9 @@ class KinectTracker {
 
     if (receivedPoints.size() > 0){
       drawnPoints = new ArrayList<PVector>(receivedPoints);
+      ArrayList<PVector> sentCopy = new ArrayList<PVector>(sentPoints);
+      sentCopy.removeAll(drawnPoints);
+      drawnPoints.addAll(sentCopy);
     }
     else{
       drawnPoints = new ArrayList<PVector>(sentPoints);
@@ -41,8 +46,9 @@ class KinectTracker {
     kinectLayer.directionalLight(secondaryRed, secondaryGreen, secondaryBlue, 1, 0, 0);
     //drawBoxes(kinectLayer);
     if (drawnPoints.size() > 0) {
-      drawTriangles(kinectLayer);
+      drawTriangles(drawnPoints, kinectLayer);
     }
+      //drawTriangles(sentPoints, kinectLayer);
     //kinectLayer.filter(blur);
     kinectLayer.endDraw();
 
@@ -57,10 +63,10 @@ class KinectTracker {
     }
   }
 
-  void drawTriangles(PGraphics pg) {
+  void drawTriangles(ArrayList<PVector> points, PGraphics pg) {
 
     myTriangles.clear();
-    new Triangulator().triangulate(drawnPoints, myTriangles);
+    new Triangulator().triangulate(points, myTriangles);
     
     for (Triangle t : myTriangles)
     {
