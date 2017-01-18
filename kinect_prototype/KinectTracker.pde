@@ -29,10 +29,10 @@ class KinectTracker {
     }
 
     if (receivedPoints.size() > 0){
-      drawnPoints = receivedPoints;
+      drawnPoints = new ArrayList<PVector>(receivedPoints);
     }
     else{
-      drawnPoints = sentPoints;
+      drawnPoints = new ArrayList<PVector>(sentPoints);
     }
 
     kinectLayer.beginDraw();

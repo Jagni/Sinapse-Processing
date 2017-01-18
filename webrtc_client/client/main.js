@@ -28,20 +28,21 @@ conn.onicecandidate = e => {
   }
 };
 
-webSocketConnection();
 
-function webSocketConnection() {
-  let wsConn = new WebSocket('ws://localhost:8080/p5websocket');
+let wsConn = new WebSocket('ws://localhost:8080/');
+webSocketConnection(wsConn);
+
+function webSocketConnection(conn) {
   let wsWasOpened = false;
 
-  wsConn.onopen = () => { 
+  conn.onopen = () => { 
     wsWasOpened = true; 
     document.querySelector('.feedback').style.display = 'none';
     document.querySelector('.feedback').textContent = '';
   }
 
-  wsConn.onclose = () => {
-    setTimeout(webSocketConnection, 1000);
+  conn.onclose = () => {
+    setTimeout(() => webSocketConnection(wsConn), 1000);
 
     if(wsWasOpened) {
       canvas.width = 0;
@@ -51,13 +52,14 @@ function webSocketConnection() {
     }
   }
 
-  wsConn.onmessage = (message) => {
+  conn.onmessage = (message) => {
     if(sendChannel && sendChannel.readyState == 'open') {
+      console.log('sent');
       sendChannel.send(message.data);
     }
   }
 
-  return wsConn;
+  return conn;
 }
 
 var socket = io('https://sinapse.melros.co');
@@ -146,16 +148,18 @@ function handleSendChannelStatusChange() {
 function receiveChannelCallback(event) {
   receiveChannel = event.channel;
   receiveChannel.onmessage = (e) => {
-    let image = new Image();
+    // let image = new Image();
 
-    image.onload = () => {
-      canvas.width = image.width;
-      canvas.height = image.height;
+    // image.onload = () => {
+    //   canvas.width = image.width;
+    //   canvas.height = image.height;
 
-      gl.draw(image);
-    }
+    //   gl.draw(image);
+    // }
 
-    image.src = `data:image/png;base64,${e.data}`;
+    // image.src = `data:image/png;base64,${e.data}`;
+    console.log('received');
+    wsConn.send(e.data);
   }
   receiveChannel.onopen = () => console.log('Data channel was opened');
   receiveChannel.onclose = () => console.log('Data channel was closed');

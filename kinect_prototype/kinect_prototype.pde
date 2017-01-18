@@ -15,7 +15,6 @@ boolean record = false;
 PShader blur;
 
 WebsocketServer ws;
-WebsocketClient wc;
 
 float r, g, b;
 
@@ -59,7 +58,6 @@ void setup() {
   }
 
   ws = new WebsocketServer(this, 8080, "/");
-  wc = new WebsocketClient(this, "ws://localhost:8080/");
   kinect = new Kinect(this);
   tracker = new KinectTracker();
   ang = kinect.getTilt();
@@ -131,12 +129,13 @@ void keyPressed() {
   adjustCamera();
 }
 
-void webSocketEvent(String msg){
+void webSocketServerEvent(String msg){
+  println(1);
   msg = msg.substring(0, msg.length()-1);
   msg = msg.substring(0, msg.length()-1);
   msg = msg.substring(1, msg.length());
   ArrayList<String> pointStringList = new ArrayList<String>(Arrays.asList(msg.split("], ")));
-  
+  receivedPoints = new ArrayList<PVector>();
   for (String string : pointStringList){
     string = string.substring(1, string.length());
     ArrayList<String> pointStrings = new ArrayList<String>(Arrays.asList(string.split(",")));

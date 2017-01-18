@@ -5,7 +5,7 @@ const port = 3000;
 app.use(express.static('./client'));
 
 app.get('/', (req, res) => {
-  res.sendFiles(`${__dirname}/client/index.html`);
+  res.sendFile(`${__dirname}/client/index.html`);
 })
  
 app.listen(port, console.log(`Server started on http://localhost:${port}`));
