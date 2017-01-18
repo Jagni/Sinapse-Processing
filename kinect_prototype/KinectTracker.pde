@@ -56,7 +56,7 @@ class KinectTracker {
       OBJExport recordLayer = (OBJExport) createGraphics(800, 600, "nervoussystem.obj.OBJExport", "colored.obj");
       recordLayer.setColor(true);
       recordLayer.beginDraw();
-      drawTriangles(recordLayer);
+      drawTriangles(drawnPoints, recordLayer);
       recordLayer.endDraw();
       recordLayer.dispose();
       record = false;
