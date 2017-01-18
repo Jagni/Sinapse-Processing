@@ -136,11 +136,18 @@ function connect() {
 
 function handleCreateDescriptionError() {}
 
-function handleSendChannelStatusChange() {
+function handleSendChannelStatusChange(e) {
+  console.log('===');
+  console.log(e);
+  console.log('===');
+
+  var state = sendChannel.readyState;
+
+  console.log('State: ', state);
+
   if (sendChannel) {
-    var state = sendChannel.readyState;
-  
-    if (state === 'open') {
+    if (state === 'close') {
+      console.log('Isso é tudo, pessoal!');
     }
   }
 }
@@ -148,16 +155,6 @@ function handleSendChannelStatusChange() {
 function receiveChannelCallback(event) {
   receiveChannel = event.channel;
   receiveChannel.onmessage = (e) => {
-    // let image = new Image();
-
-    // image.onload = () => {
-    //   canvas.width = image.width;
-    //   canvas.height = image.height;
-
-    //   gl.draw(image);
-    // }
-
-    // image.src = `data:image/png;base64,${e.data}`;
     console.log('received');
     wsConn.send(e.data);
   }
