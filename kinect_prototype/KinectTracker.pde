@@ -32,9 +32,9 @@ class KinectTracker {
 
     if (receivedPoints.size() > 0){
       drawnPoints = new ArrayList<PVector>(receivedPoints);
-      ArrayList<PVector> sentCopy = new ArrayList<PVector>(sentPoints);
-      sentCopy.removeAll(drawnPoints);
-      drawnPoints.addAll(sentCopy);
+      //ArrayList<PVector> sentCopy = new ArrayList<PVector>(sentPoints);
+      //sentCopy.removeAll(drawnPoints);
+      //drawnPoints.addAll(sentCopy);
     }
     else{
       drawnPoints = new ArrayList<PVector>(sentPoints);
@@ -88,7 +88,7 @@ class KinectTracker {
         pg.endShape();
         }
 
-        float weight = map(t.p2.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+        float weight = 2;//map(t.p2.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
         if (lines){
         line3D(t.p1.x, t.p1.y, t.p1.z, 
@@ -96,7 +96,7 @@ class KinectTracker {
           weight, 
           color(50 + maxAmplitude*205), pg);
 
-        weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+        //weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
 
         line3D(t.p1.x, t.p1.y, t.p1.z, 
@@ -104,7 +104,7 @@ class KinectTracker {
           weight, 
           color(200 + maxAmplitude*55), pg);
           
-        weight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+        //sweight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
 
         line3D(t.p3.x, t.p3.y, t.p3.z, 
