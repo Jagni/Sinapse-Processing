@@ -10,9 +10,10 @@ boolean kinectless = false;
 boolean lines = true;
 boolean triangles = true;
 PImage photo;
-int threshold = 1000;
+int threshold = 960;
 boolean record = false;
 PShader blur;
+float cameraX, cameraY;
 
 WebsocketServer ws;
 
@@ -20,8 +21,8 @@ float r, g, b;
 
 //Kinect angle
 float ang;
-int skip = 20;
-int factor = 1100;
+int skip = 16;
+int factor = 725;
 
 ArrayList<PVector> sentPoints = new ArrayList<PVector>();
 ArrayList<PVector> receivedPoints = new ArrayList<PVector>();
@@ -38,7 +39,10 @@ PostFX fx;
 PApplet applet;
 float centerX, centerY; 
 void setup() {
+  noCursor();
   fullScreen(P3D);
+  cameraX = 0.509375* width;
+  cameraY = 0.27314815*height;
   //size(800, 600, P3D);
   fx = new PostFX(width, height);
   kinectLayer = createGraphics(width, height, P3D);
@@ -48,8 +52,8 @@ void setup() {
   frameRate(60);
   applet = this;
 
-  centerX = width/2.0 - 50;
-  centerY = 50 + height/2; 
+  centerX = width/2.0 - 200;
+  centerY = -150 + height/2; 
 
   if (kinectless) {
     photo = loadImage("kinectless.png");
@@ -57,7 +61,7 @@ void setup() {
     threshold = 500;
   }
 
-  ws = new WebsocketServer(this, 8080, "/");
+  ws = new WebsocketServer(this, 7890, "/");
   kinect = new Kinect(this);
   tracker = new KinectTracker();
   ang = kinect.getTilt();
@@ -73,14 +77,19 @@ void setup() {
 void adjustCamera() {
   PVector v = depthToWorld(0, 0, threshold);
 
-  float xFactor = map(mouseX - (width/2), 0, width, -1, 1);
-  float yFactor = map(mouseY - (height/2), 0, height, -1, 1);
-  float zFactor = map(abs(mouseX - (width/2)), 0, 400, 0, 1);
-  kinectLayer.camera((2*(mouseX + xFactor*(width/4))), (2*(mouseY + yFactor*(height/4))), zFactor*((factor-v.z*factor)/2) + 1000, centerX, centerY, (factor-v.z*factor)/2, 0, 1, 0);
+  float xFactor = map(cameraX - (width/2), 0, width, -1, 1);
+  float yFactor = map(cameraY - (height/2), 0, height, -1, 1);
+  float zFactor = map(abs(cameraX - (width/2)), 0, 400, 0, 1);
+  kinectLayer.camera((2*(cameraX + xFactor*(width/4))), (2*(cameraY + yFactor*(height/4))), zFactor*((factor-v.z*factor)/2) + 1000, centerX, centerY, (factor-v.z*factor)/2, 0, 1, 0);
 }
 
 void mouseMoved() {
   adjustCamera();
+}
+
+void mouseClicked(){
+  println("camera x: " + cameraX + "   camera y:" + cameraY);
+  println("proporcao x: " + cameraX/width + "   proporcao y:" + cameraY/height);
 }
 
 void keyPressed() {
@@ -175,7 +184,7 @@ void draw() {
   image(result, 0, 0);
 
   //image(interfaceLayer, 0, 0);
-  text("fps: " + frameRate, 10, 50);
+  //text("fps: " + frameRate, 10, 50);
 
   //BufferedImage buffimg = (BufferedImage) kinectLayer.get().getNative(); //new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
   //ByteArrayOutputStream baos = new ByteArrayOutputStream();
