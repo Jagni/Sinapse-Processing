@@ -139,6 +139,7 @@ void keyPressed() {
 }
 
 void webSocketServerEvent(String msg){
+  if (msg.length() > 2){
   msg = msg.substring(0, msg.length()-1);
   msg = msg.substring(0, msg.length()-1);
   msg = msg.substring(1, msg.length());
@@ -151,6 +152,7 @@ void webSocketServerEvent(String msg){
     float y = Float.parseFloat(pointStrings.get(1));
     float z = Float.parseFloat(pointStrings.get(2));
     receivedPoints.add(new PVector(x, y, z));
+  }
   }
 }
 
