@@ -14,7 +14,9 @@ int threshold = 960;
 boolean record = false;
 PShader blur;
 float cameraX, cameraY;
-
+boolean cameraIsLocked = true;
+ArrayList<String> avatars = new ArrayList<String>();
+int avatarIndex = 0;
 WebsocketServer ws;
 
 float r, g, b;
@@ -41,8 +43,14 @@ float centerX, centerY;
 void setup() {
   noCursor();
   fullScreen(P3D);
-  cameraX = 0.509375* width;
-  cameraY = 0.27314815*height;
+  if (kinectless){
+    cameraX = 0.5*width;
+    cameraY = 0.5*height;
+  }
+  else{
+    cameraX = 0.509375* width;
+    cameraY = 0.27314815*height;
+  }
   //size(800, 600, P3D);
   fx = new PostFX(width, height);
   kinectLayer = createGraphics(width, height, P3D);
@@ -51,6 +59,11 @@ void setup() {
   setupAudio();
   frameRate(60);
   applet = this;
+  
+  avatars.add("faraó");
+  avatars.add("bolinhas");
+  avatars.add("quadrados");
+  avatars.add("linhas");
 
   centerX = width/2.0 - 200;
   centerY = -150 + height/2; 
@@ -72,11 +85,11 @@ void setup() {
   }
 
   fft = new FFT(in.bufferSize(), in.sampleRate());
+  adjustCamera();
 }
 
 void adjustCamera() {
   PVector v = depthToWorld(0, 0, threshold);
-
   float xFactor = map(cameraX - (width/2), 0, width, -1, 1);
   float yFactor = map(cameraY - (height/2), 0, height, -1, 1);
   float zFactor = map(abs(cameraX - (width/2)), 0, 400, 0, 1);
@@ -84,10 +97,15 @@ void adjustCamera() {
 }
 
 void mouseMoved() {
+  if (!cameraIsLocked){
+    cameraX = mouseX;
+    cameraY = mouseY;
+  }
   adjustCamera();
 }
 
 void mouseClicked(){
+  cameraIsLocked = !cameraIsLocked;
   println("camera x: " + cameraX + "   camera y:" + cameraY);
   println("proporcao x: " + cameraX/width + "   proporcao y:" + cameraY/height);
 }
@@ -99,20 +117,24 @@ void keyPressed() {
     triangles = !triangles;
   } else if (key == 'w') {
     centerY+= 10;
+    adjustCamera();
   } else if (key == 's') {
     centerY-= 10;
+    adjustCamera();
   }
   if (key == 'a') {
     centerX+= 100;
+    adjustCamera();
   } else if (key == 'd') {
     centerX-= 100;
+    adjustCamera();
   } else if (key == 'z') {
     skip--;
-    skip = (int) constrain(skip, 10, 50);
+    skip = (int) constrain(skip, 1, 50);
     sentPoints = new ArrayList<PVector>();
   } else if (key == 'x') {
     skip++;
-    skip = (int) constrain(skip, 10, 50);
+    skip = (int) constrain(skip, 1, 50);
     sentPoints = new ArrayList<PVector>();
   } else if (key == 'c' || key == 'C') {
     factor-=25;
@@ -134,12 +156,22 @@ void keyPressed() {
       threshold = (int) constrain(threshold, 0, 1000);
       sentPoints = new ArrayList<PVector>();
     }
+     else if (keyCode == LEFT) {
+      avatarIndex--;
+      if (avatarIndex < 0){
+        avatarIndex = avatars.size()-1;
+      }
+      avatarIndex = avatarIndex % avatars.size();
+    }
+     else if (keyCode == RIGHT) {
+      avatarIndex++;
+      avatarIndex = avatarIndex % avatars.size();
+    }
   }
-  adjustCamera();
 }
 
 void webSocketServerEvent(String msg){
-  if (msg.length() > 2){
+  if (msg.length() > 4){
   msg = msg.substring(0, msg.length()-1);
   msg = msg.substring(0, msg.length()-1);
   msg = msg.substring(1, msg.length());

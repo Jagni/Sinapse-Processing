@@ -17,39 +17,59 @@ class KinectTracker {
     depth = kinect.getRawDepth();
     background(0);
     boolean shouldCreatePoints = true;
-    
+
     drawnPoints = new ArrayList<PVector>();
 
     //if (kinectless && sentPoints.size() > 0) {
     //  shouldCreatePoints = true;
     //} else {
-      sentPoints = new ArrayList<PVector>();
+    sentPoints = new ArrayList<PVector>();
     //}
 
     if (shouldCreatePoints) {
       createPoints();
     }
 
-    if (receivedPoints.size() > 0){
+    if (receivedPoints.size() > 0) {
       drawnPoints = new ArrayList<PVector>(receivedPoints);
-      //ArrayList<PVector> sentCopy = new ArrayList<PVector>(sentPoints);
-      //sentCopy.removeAll(drawnPoints);
-      //drawnPoints.addAll(sentCopy);
-    }
-    else{
+      ArrayList<PVector> sentCopy = new ArrayList<PVector>(sentPoints);
+      sentCopy.removeAll(drawnPoints);
+      drawnPoints.addAll(sentCopy);
+    } else {
       drawnPoints = new ArrayList<PVector>(sentPoints);
     }
 
     kinectLayer.beginDraw();
     kinectLayer.translate(width/2, height/2, 0);
-    kinectLayer.directionalLight(mainRed, mainGreen, mainBlue, -1, 0, 0);
-    kinectLayer.directionalLight(secondaryRed, secondaryGreen, secondaryBlue, 1, 0, 0);
-    //drawBoxes(kinectLayer);
+    kinectLayer.directionalLight(mainRed, mainGreen, mainBlue, -1, 0, -0.25);
+    kinectLayer.directionalLight(secondaryRed, secondaryGreen, secondaryBlue, 1, 0, -0.25);
     if (drawnPoints.size() > 0) {
-      drawTriangles(drawnPoints, kinectLayer);
+      switch(avatars.get(avatarIndex)) {
+      case "faraó":
+        {
+          drawTriangles(drawnPoints, kinectLayer);
+          break;
+        }
+
+      case "bolinhas":
+        {
+          drawSpheres(drawnPoints, kinectLayer);
+          break;
+        }
+
+      case "quadrados":
+        {
+          drawBoxes(drawnPoints, kinectLayer);
+          break;
+        }
+
+      case "linhas":
+        {
+          drawCoordinatedBoxes(drawnPoints, kinectLayer);
+          break;
+        }
+      }
     }
-      //drawTriangles(sentPoints, kinectLayer);
-    //kinectLayer.filter(blur);
     kinectLayer.endDraw();
 
     if (record) {
@@ -67,50 +87,50 @@ class KinectTracker {
 
     myTriangles.clear();
     new Triangulator().triangulate(points, myTriangles);
-    
+
     for (Triangle t : myTriangles)
     {
       //float p = t.diameter()/2;
       //float area = sqrt(p*((p-t.p1.dist(t.p2))*(p-t.p2.dist(t.p3))*(p-t.p3.dist(t.p1))));
-      if (dist(t.p1.x, t.p1.y, t.p2.x, t.p2.y) < skip*5 && dist(t.p1.x, t.p1.y, t.p3.x, t.p3.y) < skip*5 &&  dist(t.p3.x, t.p3.y, t.p2.x, t.p2.y) < skip*5){
-      //if (t.p1.dist(t.p2) < skip*4 && t.p1.dist(t.p3) < skip*4 && t.p3.dist(t.p2) < skip*4) {
+      if (dist(t.p1.x, t.p1.y, t.p2.x, t.p2.y) < skip*5*factor*0.00075 && dist(t.p1.x, t.p1.y, t.p3.x, t.p3.y) < skip*5*factor*0.00075 &&  dist(t.p3.x, t.p3.y, t.p2.x, t.p2.y) < skip*5*factor*0.00075) {
+        //if (t.p1.dist(t.p2) < skip*4 && t.p1.dist(t.p3) < skip*4 && t.p3.dist(t.p2) < skip*4) {
         float zAverage = (t.p1.z + t.p2.z + t.p3.z)/3;
         PVector maxDepthVector = depthToWorld(0, 0, this.maximumDepth);
         PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
-        if (triangles){
-        //pg.fill(map(zAverage, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 255, 50));
-        pg.fill(50 + maxAmplitude*205);
-        pg.noStroke();
-        pg.beginShape(TRIANGLES);
-        pg.vertex(t.p1.x, t.p1.y, t.p1.z);
-        pg.vertex(t.p2.x, t.p2.y, t.p2.z);
-        pg.vertex(t.p3.x, t.p3.y, t.p3.z);
-        pg.endShape();
+        if (triangles) {
+          //pg.fill(map(zAverage, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 255, 50));
+          pg.fill(50 + maxAmplitude*205);
+          pg.noStroke();
+          pg.beginShape(TRIANGLES);
+          pg.vertex(t.p1.x, t.p1.y, t.p1.z);
+          pg.vertex(t.p2.x, t.p2.y, t.p2.z);
+          pg.vertex(t.p3.x, t.p3.y, t.p3.z);
+          pg.endShape();
         }
 
         float weight = 2;//map(t.p2.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
-        if (lines){
-        line3D(t.p1.x, t.p1.y, t.p1.z, 
-          t.p2.x, t.p2.y, t.p2.z, 
-          weight, 
-          color(50 + maxAmplitude*205), pg);
+        if (lines) {
+          line3D(t.p1.x, t.p1.y, t.p1.z, 
+            t.p2.x, t.p2.y, t.p2.z, 
+            weight, 
+            color(50 + maxAmplitude*205), pg);
 
-        //weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
-
-
-        line3D(t.p1.x, t.p1.y, t.p1.z, 
-          t.p3.x, t.p3.y, t.p3.z, 
-          weight, 
-          color(200 + maxAmplitude*55), pg);
-          
-        //sweight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+          //weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
 
-        line3D(t.p3.x, t.p3.y, t.p3.z, 
-          t.p2.x, t.p2.y, t.p2.z, 
-          weight, 
-          color(255), pg);
+          line3D(t.p1.x, t.p1.y, t.p1.z, 
+            t.p3.x, t.p3.y, t.p3.z, 
+            weight, 
+            color(200 + maxAmplitude*55), pg);
+
+          //sweight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+
+
+          line3D(t.p3.x, t.p3.y, t.p3.z, 
+            t.p2.x, t.p2.y, t.p2.z, 
+            weight, 
+            color(255), pg);
         }
       }
     }
@@ -158,7 +178,7 @@ class KinectTracker {
     }
   }
 
-  void drawBoxes(PGraphics graphic) {
+  void drawCoordinatedBoxes(ArrayList<PVector> points, PGraphics graphic) {
     PVector point1;
     PVector point2;
     int edgeCount = 0;
@@ -170,22 +190,56 @@ class KinectTracker {
       for (int j = i+1; j < drawnPoints.size(); j++) {
         loopCount++;
         point2 = drawnPoints.get(j);
-        if ( point1.dist(point2) <= skip*2) {
+        if (dist(point1.x, point1.y, point2.x, point2.y) <= skip*2*factor*0.00075){
+        //if ( point1.dist(point2) <= skip*2) {
           edgeCount++;
-          PVector maxDepthVector = depthToWorld(0, 0, this.maximumDepth);
+          PVector maxDepthVector = depthToWorld(0, 0, maximumDepth);
           PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
           float weight;
-          weight = map(point1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 5, 1);
+          weight = map(point1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
           line3D(point1.x, point1.y, point1.z, 
             point2.x, point2.y, point2.z, 
-            5, 
+            weight, 
             color(255, 255, 255), graphic);
         }
 
-        if (edgeCount >= 2) {
+        if (edgeCount >= 3) {
           break;
         }
       }
+    }
+  }
+
+  void drawSpheres(ArrayList<PVector> points, PGraphics graphic) {
+    graphic.sphereDetail(10);
+    graphic.noStroke();
+    for (PVector point : points) {
+      graphic.fill(255);
+      graphic.pushMatrix();
+      graphic.translate(point.x, point.y, point.z);
+      PVector maxDepthVector = depthToWorld(0, 0, maximumDepth);
+      PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
+      float weight;
+      weight = map(point.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, skip*0.75, skip*0.3);
+      graphic.sphere(weight);
+      graphic.popMatrix();
+    }
+  }
+
+  void drawBoxes(ArrayList<PVector> points, PGraphics graphic) {
+    graphic.sphereDetail(10);
+    graphic.noStroke();
+    for (PVector point : points) {
+      graphic.fill(255);
+      graphic.pushMatrix();
+      graphic.translate(point.x, point.y, point.z);
+      graphic.rotateY(PI/4);
+      PVector maxDepthVector = depthToWorld(0, 0, maximumDepth);
+      PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
+      float weight;
+      weight = map(point.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, skip*0.75, skip*0.4);
+      graphic.box(weight);
+      graphic.popMatrix();
     }
   }
 }
