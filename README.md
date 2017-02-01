@@ -35,5 +35,6 @@ C | Aumentar zoom
 V | Diminuir zoom
 L | Ativar/desativar linhas
 T | Ativar/desativar triângulos
-Seta para cima | Aumentar threshold
-Seta para baixo | Diminuir threshold
+↑ | Aumentar threshold
+↓ | Diminuir threshold
+← / → | Trocar avatar
