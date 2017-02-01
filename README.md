@@ -26,15 +26,13 @@ _Os clientes tentarão se conectar via WebSocket em `ws://localhost:8080/p5webso
 
 Comando | Ação
 ------------ | -------------
+Clique | Lock/Unlock da câmera
 Mover mouse | Rotacionar câmera
 WASD | Deslizar câmera
 Q | Salvar arquivo .obj
-Z | Aumentar nível de detalhes
-X | Diminuir nível de detalhes
-C | Aumentar zoom
-V | Diminuir zoom
-L | Ativar/desativar linhas
-T | Ativar/desativar triângulos
-↑ | Aumentar threshold
-↓ | Diminuir threshold
-← / → | Trocar avatar
+Z / X | Controle de nível de detalhes
+C / V | Controle de zoom
+L | Controle de linhas (Avatar Faraó)
+T | Controle de triângulos (Avatar Faraó)
+↑ / ↓ | Controle de threshold
+← / → | Controle de avatar
