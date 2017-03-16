@@ -128,7 +128,7 @@ class KinectTracker {
 
     for (int i = 0; i < originalTriangles.size(); i++) {
       Triangle t = originalTriangles.get(i);
-      if (dist(t.p1.x, t.p1.y, t.p2.x, t.p2.y) < skip*0.0033 && dist(t.p1.x, t.p1.y, t.p3.x, t.p3.y) < skip*0.0033 &&  dist(t.p3.x, t.p3.y, t.p2.x, t.p2.y) < skip*0.0033) {
+      if (dist(t.p1.x, t.p1.y, t.p2.x, t.p2.y) < skip*0.009 && dist(t.p1.x, t.p1.y, t.p3.x, t.p3.y) < skip*0.009 &&  dist(t.p3.x, t.p3.y, t.p2.x, t.p2.y) < skip*0.009) {
         //if (t.p1.dist(t.p2) < skip*4 && t.p1.dist(t.p3) < skip*4 && t.p3.dist(t.p2) < skip*4) {
         //float zAverage = (t.p1.z + t.p2.z + t.p3.z)/3;
         //PVector maxDepthVector = depthToWorld(0, 0, this.maximumDepth);
@@ -206,7 +206,7 @@ class KinectTracker {
           if (rawDepth > maximumDepth) {
             maximumDepth = rawDepth;
           }
-          gridMatrix[gridX][gridY] = map(rawDepth, 0, 2046, 1023, 0)/10;
+          gridMatrix[gridX][gridY] = pow(map(rawDepth, 0, 2046-threshold, 100, 0), 2)/10;
           PVector v = depthToWorld(x, y, rawDepth);
           originalPoints.add(v);
           sentPoints.add( new PVector(v.x*factor, v.y*factor, factor-v.z*factor ) );
@@ -243,7 +243,7 @@ class KinectTracker {
         originalPoint2 = originalPoints.get(j);
         point2 = points.get(j);
         float thresholdMap = map(threshold, 0, 2046, 1, 0.0075);
-        if (originalPoint1.dist(originalPoint2) < skip*0.0015/thresholdMap){
+        if (originalPoint1.dist(originalPoint2) < skip*0.0025/thresholdMap){
         //if (dist(originalPoint1.x, originalPoint1.y, originalPoint2.x, originalPoint2.y) < skip*0.0025) {
           edgeCount++;
           PVector maxDepthVector = depthToWorld(0, 0, maximumDepth);
