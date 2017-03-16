@@ -3,6 +3,8 @@ import java.io.*;
 import javax.imageio.ImageIO;
 import java.util.Arrays;
 
+WB_Render render;
+
 KinectTracker tracker;
 Kinect kinect;
 
@@ -32,6 +34,7 @@ ArrayList<PVector> drawnPoints = new ArrayList<PVector>();
 
 // Lookup table for all possible depth values (0 - 2047)
 float[] depthLookUp = new float[2048];
+float[][] gridMatrix;
 
 PGraphics kinectLayer;
 PGraphics interfaceLayer;
@@ -42,7 +45,9 @@ PApplet applet;
 float centerX, centerY; 
 void setup() {
   noCursor();
+  render=new WB_Render(this);
   fullScreen(P3D);
+  //size(800, 600, P3D);
   if (kinectless){
     cameraX = 0.5*width;
     cameraY = 0.5*height;
@@ -51,7 +56,7 @@ void setup() {
     cameraX = 0.509375* width;
     cameraY = 0.27314815*height;
   }
-  //size(800, 600, P3D);
+  
   fx = new PostFX(width, height);
   kinectLayer = createGraphics(width, height, P3D);
   interfaceLayer = createGraphics(width, height, P2D);
@@ -64,6 +69,7 @@ void setup() {
   avatars.add("bolinhas");
   avatars.add("quadrados");
   avatars.add("linhas");
+  avatars.add("hemesh");
 
   centerX = width/2.0 - 200;
   centerY = -150 + height/2; 
@@ -78,7 +84,6 @@ void setup() {
   kinect = new Kinect(this);
   tracker = new KinectTracker();
   ang = kinect.getTilt();
-  //setupAudio();
 
   for (int i = 0; i < depthLookUp.length; i++) {
     depthLookUp[i] = rawDepthToMeters(i);
@@ -218,7 +223,7 @@ void draw() {
   image(result, 0, 0);
 
   //image(interfaceLayer, 0, 0);
-  //text("fps: " + frameRate, 10, 50);
+  text("fps: " + frameRate, 10, 50);
 
   //BufferedImage buffimg = (BufferedImage) kinectLayer.get().getNative(); //new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB);
   //ByteArrayOutputStream baos = new ByteArrayOutputStream();

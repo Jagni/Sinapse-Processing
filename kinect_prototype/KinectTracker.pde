@@ -1,4 +1,6 @@
-ArrayList<Triangle> myTriangles = new ArrayList<Triangle>();
+ArrayList<Triangle> myTriangles = new ArrayList<Triangle>(); //<>// //<>//
+ArrayList<Triangle> originalTriangles = new ArrayList<Triangle>();
+ArrayList<PVector> originalPoints = new ArrayList<PVector>();
 class KinectTracker {
   // Depth data
   int[] depth;
@@ -7,7 +9,7 @@ class KinectTracker {
 
   KinectTracker() {
     kinect.initDepth();
-    kinect.enableMirror(false);
+    kinect.enableMirror(true);
   }
 
   void display() {
@@ -24,6 +26,7 @@ class KinectTracker {
     //  shouldCreatePoints = true;
     //} else {
     sentPoints = new ArrayList<PVector>();
+    originalPoints = new ArrayList<PVector>();
     //}
 
     if (shouldCreatePoints) {
@@ -68,6 +71,11 @@ class KinectTracker {
           drawCoordinatedBoxes(drawnPoints, kinectLayer);
           break;
         }
+      case "hemesh":
+        {
+          drawGrid();
+          break;
+        }
       }
     }
     kinectLayer.endDraw();
@@ -83,52 +91,80 @@ class KinectTracker {
     }
   }
 
+  void drawGrid() {
+    pushMatrix();
+    translate(width/2, height/2);
+    float xFactor = map(cameraX, 0, width, -1, 1);
+    float yFactor = map(cameraY, 0, height, -1, 1);
+    rotateY(xFactor*QUARTER_PI);
+    rotateX(yFactor*QUARTER_PI);
+    HEC_Grid creator=new HEC_Grid();
+    int xRange, yRange;
+    if (kinectless) {
+      xRange = photo.width;
+      yRange = photo.height;
+    } else {
+      xRange = kinect.width;
+      yRange = kinect.height;
+    }
+    creator.setU(xRange/skip);// number of cells in U direction
+    creator.setV(yRange/skip);// number of cells in V direction
+    creator.setUSize(width);// size of grid in U direction
+    creator.setVSize(height);// size of grid in V direction
+    creator.setWValues(gridMatrix);// displacement of grid points (W value)
+    HE_Mesh mesh=new HE_Mesh(creator);
+    fill(0);
+    noStroke();
+    render.drawFaces(mesh);
+    stroke(color(mainRed, mainGreen, mainBlue));
+    render.drawEdges(mesh);
+    popMatrix();
+  }
+
   void drawTriangles(ArrayList<PVector> points, PGraphics pg) {
 
-    myTriangles.clear();
-    new Triangulator().triangulate(points, myTriangles);
+    originalTriangles.clear();
+    new Triangulator().triangulate(originalPoints, originalTriangles);
 
-    for (Triangle t : myTriangles)
-    {
-      //float p = t.diameter()/2;
-      //float area = sqrt(p*((p-t.p1.dist(t.p2))*(p-t.p2.dist(t.p3))*(p-t.p3.dist(t.p1))));
-      if (dist(t.p1.x, t.p1.y, t.p2.x, t.p2.y) < skip*5*factor*0.00075 && dist(t.p1.x, t.p1.y, t.p3.x, t.p3.y) < skip*5*factor*0.00075 &&  dist(t.p3.x, t.p3.y, t.p2.x, t.p2.y) < skip*5*factor*0.00075) {
+    for (int i = 0; i < originalTriangles.size(); i++) {
+      Triangle t = originalTriangles.get(i);
+      if (dist(t.p1.x, t.p1.y, t.p2.x, t.p2.y) < skip*0.0033 && dist(t.p1.x, t.p1.y, t.p3.x, t.p3.y) < skip*0.0033 &&  dist(t.p3.x, t.p3.y, t.p2.x, t.p2.y) < skip*0.0033) {
         //if (t.p1.dist(t.p2) < skip*4 && t.p1.dist(t.p3) < skip*4 && t.p3.dist(t.p2) < skip*4) {
-        float zAverage = (t.p1.z + t.p2.z + t.p3.z)/3;
-        PVector maxDepthVector = depthToWorld(0, 0, this.maximumDepth);
-        PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
+        //float zAverage = (t.p1.z + t.p2.z + t.p3.z)/3;
+        //PVector maxDepthVector = depthToWorld(0, 0, this.maximumDepth);
+        //PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
         if (triangles) {
           //pg.fill(map(zAverage, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 255, 50));
           pg.fill(50 + maxAmplitude*205);
           pg.noStroke();
           pg.beginShape(TRIANGLES);
-          pg.vertex(t.p1.x, t.p1.y, t.p1.z);
-          pg.vertex(t.p2.x, t.p2.y, t.p2.z);
-          pg.vertex(t.p3.x, t.p3.y, t.p3.z);
+           pg.vertex(t.p1.x*factor, t.p1.y*factor, factor-t.p1.z*factor );
+          pg.vertex(t.p2.x*factor, t.p2.y*factor, factor-t.p2.z*factor );
+          pg.vertex(t.p3.x*factor, t.p3.y*factor, factor-t.p3.z*factor );
           pg.endShape();
         }
 
         float weight = 2;//map(t.p2.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
         if (lines) {
-          line3D(t.p1.x, t.p1.y, t.p1.z, 
-            t.p2.x, t.p2.y, t.p2.z, 
+          line3D(t.p1.x*factor, t.p1.y*factor, factor-t.p1.z*factor , 
+            t.p2.x*factor, t.p2.y*factor, factor-t.p2.z*factor, 
             weight, 
             color(50 + maxAmplitude*205), pg);
 
           //weight = map(t.p3.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
 
-          line3D(t.p1.x, t.p1.y, t.p1.z, 
-            t.p3.x, t.p3.y, t.p3.z, 
+          line3D(t.p1.x*factor, t.p1.y*factor, factor-t.p1.z*factor, 
+            t.p3.x*factor, t.p3.y*factor, factor-t.p3.z*factor, 
             weight, 
             color(200 + maxAmplitude*55), pg);
 
           //sweight = map(t.p1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
 
 
-          line3D(t.p3.x, t.p3.y, t.p3.z, 
-            t.p2.x, t.p2.y, t.p2.z, 
+          line3D(t.p3.x*factor, t.p3.y*factor, factor-t.p3.z*factor, 
+            t.p2.x*factor, t.p2.y*factor, factor-t.p2.z*factor, 
             weight, 
             color(255), pg);
         }
@@ -146,7 +182,8 @@ class KinectTracker {
       xRange = kinect.width;
       yRange = kinect.height;
     }
-
+    gridMatrix = new float[(xRange/skip) + 1][(yRange/skip) + 1];
+    int gridX = 0, gridY = 0;
     for (int x = 0; x < xRange; x += skip) {
       for (int y = 0; y < yRange; y += skip) {
         int offset = x + y * xRange;
@@ -169,41 +206,61 @@ class KinectTracker {
           if (rawDepth > maximumDepth) {
             maximumDepth = rawDepth;
           }
-
+          gridMatrix[gridX][gridY] = map(rawDepth, 0, 2046, 1023, 0)/10;
           PVector v = depthToWorld(x, y, rawDepth);
-
+          originalPoints.add(v);
           sentPoints.add( new PVector(v.x*factor, v.y*factor, factor-v.z*factor ) );
+        } else {
+          gridMatrix[gridX][gridY] = 0;
         }
+        gridY++;
       }
+      gridX++;
+      gridY = 0;
     }
   }
 
   void drawCoordinatedBoxes(ArrayList<PVector> points, PGraphics graphic) {
-    PVector point1;
-    PVector point2;
+    PVector point1, point2;
+    PVector originalPoint1, originalPoint2;
     int edgeCount = 0;
-
-    for (int i = 0; i < drawnPoints.size(); i++) {
-      int loopCount = 0;
+    int loopCount = 0;
+    int xRange, yRange;
+    if (kinectless) {
+      xRange = photo.width;
+      yRange = photo.height;
+    } else {
+      xRange = kinect.width;
+      yRange = kinect.height;
+    }
+    for (int i = 0; i < points.size(); i++) {
       edgeCount = 0;
-      point1 = drawnPoints.get(i);
-      for (int j = i+1; j < drawnPoints.size(); j++) {
+      loopCount = 0;
+      originalPoint1 = originalPoints.get(i);
+      point1 = points.get(i);
+      for (int j = i+1; j < points.size(); j++) {
         loopCount++;
-        point2 = drawnPoints.get(j);
-        if (dist(point1.x, point1.y, point2.x, point2.y) <= skip*2*factor*0.00075){
-        //if ( point1.dist(point2) <= skip*2) {
+        originalPoint2 = originalPoints.get(j);
+        point2 = points.get(j);
+        float thresholdMap = map(threshold, 0, 2046, 1, 0.0075);
+        if (originalPoint1.dist(originalPoint2) < skip*0.0015/thresholdMap){
+        //if (dist(originalPoint1.x, originalPoint1.y, originalPoint2.x, originalPoint2.y) < skip*0.0025) {
           edgeCount++;
           PVector maxDepthVector = depthToWorld(0, 0, maximumDepth);
           PVector minDepthVector = depthToWorld(0, 0, minimumDepth);
           float weight;
-          weight = map(point1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
+          //weight = map(point1.z, factor-minDepthVector.z*factor, factor-maxDepthVector.z*factor, 3, 1);
           line3D(point1.x, point1.y, point1.z, 
             point2.x, point2.y, point2.z, 
-            weight, 
+            2, 
             color(255, 255, 255), graphic);
         }
 
         if (edgeCount >= 3) {
+          break;
+        }
+
+        if (loopCount >= 2*(yRange/skip)) {
           break;
         }
       }
